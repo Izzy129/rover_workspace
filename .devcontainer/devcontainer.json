@@ -1,0 +1,45 @@
+{
+  "name": "Rice Robotics ROS2 Development Container",
+  "privileged": true,
+  "remoteUser": "robotics",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "USERNAME": "robotics",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "ms-python.black-formatter",
+        "ms-python.debugpy",
+        "ms-python.vscode-pylance",
+        "ranch-hand-robotics.rde-ros-2",
+        "ranch-hand-robotics.urdf-editor"
+      ]
+    }
+  },
+  "containerEnv": {
+    "DISPLAY": "unix:0",
+    "ROS_LOCALHOST_ONLY": "1",
+    "ROS_DOMAIN_ID": "42"
+  },
+  "runArgs": [
+    "--net=host",
+    "--pid=host",
+    "--ipc=host",
+    "-e", "DISPLAY=${env:DISPLAY}"
+  ],
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+    "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
+  ],
+  "postCreateCommand": "bash -c 'cd \"$WORKSPACE_FOLDER\" && mkdir -p src && (if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi) && rosdep update && rosdep install --from-paths src --ignore-src -r -y && source /opt/ros/humble/setup.bash && colcon build && sudo chown -R $(id -u):$(id -g) .'"
+}
+
