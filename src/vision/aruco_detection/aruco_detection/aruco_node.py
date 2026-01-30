@@ -16,7 +16,7 @@ Published Topics:
 Parameters:
     marker_size - size of the markers in meters (default .0625)
     aruco_dictionary_id - dictionary that was used to generate markers
-                          (default DICT_5X5_250)
+                          (default DICT_4X4_50)
     image_topic - image topic to subscribe to (default /camera/image_raw)
     camera_info_topic - camera info topic to subscribe to
                          (default /camera/camera_info)
