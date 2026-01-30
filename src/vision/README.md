@@ -56,8 +56,10 @@ Subsystem-level launch orchestration that brings up the complete vision pipeline
 1. **Install dependencies** (no pip install needed - uses system packages):
    ```bash
    cd ~/rover_workspace  # or wherever your workspace is
-   rosdep install --from-paths src/vision --ignore-src -r -y
+   rosdep install --from-paths src --ignore-src -r -y
    ```
+
+   **Note:** Use `src` not `src/vision` so rosdep can find `vision_interfaces` in `src/interfaces/`
 
 2. **Build the vision packages**:
    ```bash
