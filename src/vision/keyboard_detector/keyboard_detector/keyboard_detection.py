@@ -9,7 +9,7 @@
 
 import rclpy
 from rclpy.node import Node
-from aruco_detection_interfaces.msg import ArucoMarkers, KeyboardKeys
+from vision_interfaces.msg import ArucoMarkers, KeyboardKeys
 from geometry_msgs.msg import PoseStamped, Pose, PoseArray
 import yaml
 import numpy as np
@@ -22,7 +22,7 @@ class KeyboardNode(Node):
     def __init__(self):
         super().__init__('keyboard_node')
 
-        package_share = get_package_share_directory('aruco_detection')
+        package_share = get_package_share_directory('keyboard_detector')
         yaml_path = os.path.join(package_share, 'config', 'keys.yaml')
         
         self.get_logger().info(f'Loading keys from: {yaml_path}')

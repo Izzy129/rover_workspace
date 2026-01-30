@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>aruco_detection_interfaces</name>
+  <name>vision_interfaces</name>
   <version>0.1.0</version>
-  <description>Custom messages for aruco_detection</description>
+  <description>Custom messages for vision subsystem</description>
   <maintainer email="nathan.r.sprague@gmail.com">Nathan Sprague</maintainer>
   <license>TODO: License declaration</license>
 

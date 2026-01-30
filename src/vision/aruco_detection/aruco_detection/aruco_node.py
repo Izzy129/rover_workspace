@@ -36,7 +36,7 @@ import tf_transformations
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseArray, Pose
-from aruco_detection_interfaces.msg import ArucoMarkers
+from vision_interfaces.msg import ArucoMarkers
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 
 
