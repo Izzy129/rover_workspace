@@ -49,6 +49,32 @@ Subsystem-level launch orchestration that brings up the complete vision pipeline
 - **Parameters:** Camera type, stream type, RViz, visualizer, smoothing
 - **Dependencies:** Launches all three vision packages with parameter forwarding
 
+## For New Developers
+
+### First-Time Setup
+
+1. **Install dependencies** (no pip install needed - uses system packages):
+   ```bash
+   cd ~/rover_workspace  # or wherever your workspace is
+   rosdep install --from-paths src/vision --ignore-src -r -y
+   ```
+
+2. **Build the vision packages**:
+   ```bash
+   colcon build --packages-up-to vision_bringup
+   source install/setup.bash
+   ```
+
+3. **Test with webcam**:
+   ```bash
+   ros2 launch vision_bringup vision_bringup.launch.py
+   ```
+
+4. **(Optional) Install RealSense SDK** if using RealSense cameras:
+   - See [Intel RealSense installation guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
+
+**Note:** We follow standard ROS2 practices - all Python dependencies are managed via rosdep/apt, not pip/venv.
+
 ## Quick Start
 
 ### Launch Full Vision System
@@ -108,18 +134,25 @@ colcon build --packages-select keyboard_detector
 
 ## Dependencies
 
-All vision packages use rosdep for dependency management. Install dependencies with:
+All vision packages use rosdep for dependency management following standard ROS2 practices.
+
+### Installing Dependencies
+
+**Python packages** (OpenCV, NumPy, etc.) are automatically installed via rosdep - **no pip install needed**:
 
 ```bash
+# Install all Python dependencies from system packages
 rosdep install --from-paths src/vision --ignore-src -r -y
 ```
 
-### External Dependencies
-- OpenCV (python3-opencv)
-- NumPy (python3-numpy)
-- PyYAML (python3-yaml)
-- transforms3d (python3-transforms3d)
-- Intel RealSense SDK (for RealSense camera support)
+This installs:
+- `python3-opencv` - OpenCV for image processing
+- `python3-numpy` - NumPy for array operations
+- `python3-yaml` - YAML configuration parsing
+- `python3-transforms3d` - 3D transformations for pose estimation
+
+**RealSense SDK** (only if using RealSense cameras):
+- Follow the [Intel RealSense installation guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
 
 ## Configuration
 
