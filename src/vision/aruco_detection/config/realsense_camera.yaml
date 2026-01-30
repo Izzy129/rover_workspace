@@ -1,0 +1,49 @@
+/**:
+  ros__parameters:
+    # Camera serial number (empty = use first available)
+    serial_no: ''
+
+    # USB port ID (empty = use any)
+    usb_port_id: ''
+
+    # Device type (d435i for your camera)
+    device_type: 'd435i'
+
+    # Color stream configuration
+    enable_color: true
+    rgb_camera.profile: '640x480x30'  # width x height x fps
+
+    # Depth stream configuration
+    enable_depth: true
+    depth_module.profile: '640x480x30'
+
+    # Infrared streams configuration
+    enable_infra1: false  # Left IR camera
+    enable_infra2: false  # Right IR camera
+
+    # IMU configuration
+    enable_gyro: false
+    enable_accel: false
+
+    # Alignment options
+    align_depth: true  # Align depth to color
+
+    # Point cloud
+    pointcloud.enable: false
+
+    # Filters for depth processing
+    decimation_filter.enable: false
+    spatial_filter.enable: false
+    temporal_filter.enable: false
+    disparity_filter.enable: false
+    hole_filling_filter.enable: false
+
+    # Topic name configuration
+    camera_name: 'camera'
+    base_frame_id: 'camera_link'
+    depth_frame_id: 'camera_depth_frame'
+    color_frame_id: 'camera_color_frame'
+
+    # Publishing frequency
+    publish_tf: false  # Set to true if you want TF frames published
+    tf_publish_rate: 0.0

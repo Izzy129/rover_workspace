@@ -1,0 +1,4 @@
+# ArUco Detection Parameters
+aruco_node:
+  ros__parameters:
+    camera_frame: "camera_link"
