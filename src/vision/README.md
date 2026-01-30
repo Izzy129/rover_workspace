@@ -132,28 +132,6 @@ colcon build --packages-select aruco_detection
 colcon build --packages-select keyboard_detector
 ```
 
-## Dependencies
-
-All vision packages use rosdep for dependency management following standard ROS2 practices.
-
-### Installing Dependencies
-
-**Python packages** (OpenCV, NumPy, etc.) are automatically installed via rosdep - **no pip install needed**:
-
-```bash
-# Install all Python dependencies from system packages
-rosdep install --from-paths src/vision --ignore-src -r -y
-```
-
-This installs:
-- `python3-opencv` - OpenCV for image processing
-- `python3-numpy` - NumPy for array operations
-- `python3-yaml` - YAML configuration parsing
-- `python3-transforms3d` - 3D transformations for pose estimation
-
-**RealSense SDK** (only if using RealSense cameras):
-- Follow the [Intel RealSense installation guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
-
 ## Configuration
 
 ### ArUco Markers
