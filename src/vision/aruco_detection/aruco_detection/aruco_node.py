@@ -39,6 +39,17 @@ from geometry_msgs.msg import PoseArray, Pose
 from vision_interfaces.msg import ArucoMarkers
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 
+# Check OpenCV version - require 4.7+ for ArucoDetector API
+def check_opencv_version():
+    cv_version = tuple(map(int, cv2.__version__.split('.')[:2]))
+    if cv_version < (4, 7):
+        raise ImportError(
+            f"OpenCV {cv2.__version__} detected. This package requires OpenCV >= 4.7.0 for ArUco detection.\n"
+            f"Install with: pip install opencv-contrib-python>=4.8.0"
+        )
+
+check_opencv_version()
+
 
 class ArucoNode(rclpy.node.Node):
     def __init__(self):

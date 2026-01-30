@@ -32,3 +32,6 @@ RUN sudo apt-get update && sudo apt-get upgrade -y \
 # Source ROS environment automatically
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/$USERNAME/.bashrc
 
+# Install proper OpenCV version for Aruco API
+RUN pip install opencv-contrib-python>=4.8.0
+

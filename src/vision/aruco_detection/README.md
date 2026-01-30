@@ -59,9 +59,27 @@ ros2 launch aruco_detection aruco_detection.launch.py use_rviz:=false smoothing_
 - geometry_msgs
 - cv_bridge
 - tf2_ros
+- tf_transformations
 - vision_interfaces
-- python3-opencv
+- python3-opencv **>= 4.7.0** (requires ArUco detector API)
 - python3-numpy
+
+### OpenCV Version Requirement
+
+**This package requires OpenCV >= 4.7.0** for the `cv2.aruco.ArucoDetector` API.
+
+**If you get `AttributeError: module 'cv2.aruco' has no attribute 'ArucoDetector'`:**
+
+The `python3-opencv` package in Ubuntu 24.04 might be too old. Install via pip:
+
+```bash
+pip install opencv-contrib-python>=4.8.0
+```
+
+**Docker users:** Add to your Dockerfile:
+```dockerfile
+RUN pip install opencv-contrib-python>=4.8.0
+```
 
 ## Author
 

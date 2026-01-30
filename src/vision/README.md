@@ -75,7 +75,9 @@ Subsystem-level launch orchestration that brings up the complete vision pipeline
 4. **(Optional) Install RealSense SDK** if using RealSense cameras:
    - See [Intel RealSense installation guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
 
-**Note:** We follow standard ROS2 practices - all Python dependencies are managed via rosdep/apt, not pip/venv.
+**Notes:**
+- We follow standard ROS2 practices - all Python dependencies are managed via rosdep/apt, not pip/venv
+- **Exception:** OpenCV 4.8+ is required for ArUco detection. If `python3-opencv` from apt is too old, use: `pip install opencv-contrib-python>=4.8.0`
 
 ## Quick Start
 
