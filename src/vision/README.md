@@ -24,8 +24,6 @@ Camera abstraction layer providing a unified interface for USB cameras and RealS
 - **Publishes:** Camera images and calibration info
 - **TF:** Publishes static transform `map` → `camera_link`
 
-**TODO:** Adapt for ArduCams once they arrive
-
 ### aruco_detection
 Detects ArUco markers in camera images and estimates their 6DOF poses.
 
@@ -114,12 +112,16 @@ ros2 launch keyboard_detector keyboard_detector.launch.py
 
 | Topic | Type | Description |
 |-------|------|-------------|
-| `/image_raw` | sensor_msgs/Image | Raw camera feed (~30 Hz) |
-| `/camera_info` | sensor_msgs/CameraInfo | Camera calibration |
+| `/camera_left/image_raw` | sensor_msgs/Image | Left ArduCam raw camera feed (30 Hz) |
+| `/camera_left/camera_info` | sensor_msgs/CameraInfo | Left ArduCam calibration data |
+| `/camera_front/image_raw` | sensor_msgs/Image | Front ArduCam raw camera feed (30 Hz) |
+| `/camera_front/camera_info` | sensor_msgs/CameraInfo | Front ArduCam calibration data |
+| `/camera_right/image_raw` | sensor_msgs/Image | Right ArduCam raw camera feed (30 Hz) |
+| `/camera_right/camera_info` | sensor_msgs/CameraInfo | Right ArduCam calibration data |
 | `/aruco_markers` | vision_interfaces/ArucoMarkers | Detected markers with IDs and poses |
 | `/aruco_poses` | geometry_msgs/PoseArray | Marker poses for RViz |
 | `/aruco_detection/image` | sensor_msgs/Image | Annotated image with markers |
-| `/keyboard_center` | geometry_msgs/PoseStamped | Keyboard center pose |
+| `/keyboard_center` | geometry_msgs/PoseStamped | Keyboard center pose (used for debugging) |
 | `/keyboard_keys` | vision_interfaces/KeyboardKeys | Individual key poses and labels |
 | `/keyboard_pose` | geometry_msgs/PoseArray | Key poses for RViz |
 | `/tf_static` | tf2_msgs/TFMessage | Static transforms (map → camera_link) |
@@ -139,7 +141,7 @@ colcon build --packages-select keyboard_detector
 ## Configuration
 
 ### ArUco Markers
-- Dictionary: DICT_4X4_50 (default)
+- Dictionary: DICT_4X4_50 (default for URC)
 - Marker size: 62.5mm (configurable in `aruco_detection/config/aruco_parameters.yaml`)
 
 ### Keyboard Layout
@@ -147,7 +149,7 @@ colcon build --packages-select keyboard_detector
 - Positions are relative to keyboard center in meters
 
 ### Camera Calibration
-- Webcam: Auto-calibration from OpenCV
+- ArduCams: Auto-calibration from OpenCV
 - RealSense: Uses built-in calibration from camera firmware
 
 ## Visualization
