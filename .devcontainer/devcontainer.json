@@ -10,8 +10,8 @@
       "USER_GID": "1000"
     }
   },
-  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
-  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/robotics/rover_workspace,type=bind",
+  "workspaceFolder": "/home/robotics/rover_workspace",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -26,7 +26,6 @@
     }
   },
   "containerEnv": {
-    "DISPLAY": "unix:0",
     "ROS_LOCALHOST_ONLY": "1",
     "ROS_DOMAIN_ID": "42"
   },
@@ -34,12 +33,13 @@
     "--net=host",
     "--pid=host",
     "--ipc=host",
-    "-e", "DISPLAY=${env:DISPLAY}"
+    "-e", "DISPLAY=${env:DISPLAY}",
+    // CHANGED: Moved from 'mounts' to here to match the working example
+    "--device=/dev/dri:/dev/dri" 
   ],
   "mounts": [
-    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-    "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
+    // REMOVED: source=/dev/dri... (This was causing the build failure)
   ],
-  "postCreateCommand": "bash -c 'cd \"$WORKSPACE_FOLDER\" && mkdir -p src && (if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi) && rosdep update && rosdep install --from-paths src --ignore-src -r -y && source /opt/ros/humble/setup.bash && colcon build && sudo chown -R $(id -u):$(id -g) .'"
+  "postCreateCommand": "sudo rosdep init || true && rosdep update && rosdep install --from-paths src --ignore-src -r -y && colcon build"
 }
-
