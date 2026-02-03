@@ -19,12 +19,12 @@ setup(
     zip_safe=True,
     maintainer='R-owl-vers',
     maintainer_email='riceroboticsclub@gmail.com',
-    description='Camera abstraction layer for webcam and RealSense cameras',
+    description='Camera abstraction layer for USB cameras and RealSense cameras',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'webcam_publisher = camera_publisher.webcam_publisher:main',
+            'camera_publisher = camera_publisher.usb_camera_publisher:main',
             'realsense_publisher = camera_publisher.realsense_publisher:main',
         ],
     },

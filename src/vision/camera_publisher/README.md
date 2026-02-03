@@ -1,13 +1,11 @@
 # camera_publisher
 
-Camera abstraction layer providing a unified interface for webcam and RealSense cameras for the Rover. 
-
-**TODO: adapt for ArduCams once they arrive**
+Camera abstraction layer providing a unified interface for ArduCam and RealSense cameras for the Rover. 
 
 ## Executables
 
-### webcam_publisher
-Publishes images from a standard USB webcam (or laptop webcam).
+### camera_publisher
+Publishes images from USB cameras.
 
 **Published Topics:**
 - `/image_raw` (sensor_msgs/Image) - Raw camera image at ~30 Hz

@@ -18,9 +18,9 @@ keyboard_detector
 ## Packages
 
 ### camera_publisher
-Camera abstraction layer providing a unified interface for webcam and RealSense cameras.
+Camera abstraction layer providing a unified interface for USB cameras and RealSense cameras.
 
-- **Executables:** `webcam_publisher`, `realsense_publisher`
+- **Executables:** `camera_publisher`, `realsense_publisher`
 - **Publishes:** Camera images and calibration info
 - **TF:** Publishes static transform `map` → `camera_link`
 

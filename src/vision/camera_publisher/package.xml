@@ -3,7 +3,7 @@
 <package format="3">
   <name>camera_publisher</name>
   <version>0.1.0</version>
-  <description>Camera abstraction layer for webcam and RealSense cameras</description>
+  <description>Camera abstraction layer for USB cameras and RealSense cameras</description>
   <maintainer email="riceroboticsclub@gmail.com">TODO</maintainer>
   <license>TODO: License declaration</license>
 

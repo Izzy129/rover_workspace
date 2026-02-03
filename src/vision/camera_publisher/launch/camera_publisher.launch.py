@@ -32,11 +32,11 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'map', 'camera_link']
     )
 
-    # Webcam publisher node
-    webcam_node = Node(
+    # Camera publisher node
+    camera_node = Node(
         package='camera_publisher',
-        executable='webcam_publisher',
-        name='webcam_publisher',
+        executable='camera_publisher',
+        name='camera_publisher',
         condition=IfCondition(
             PythonExpression(["'", camera_type, "' == 'webcam'"])
         )
@@ -59,6 +59,6 @@ def generate_launch_description():
         camera_type_arg,
         stream_type_arg,
         static_tf_node,
-        webcam_node,
+        camera_node,
         realsense_node,
     ])
