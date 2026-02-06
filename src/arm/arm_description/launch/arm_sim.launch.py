@@ -13,6 +13,8 @@ def generate_launch_description():
 
     robot_description_config = xacro.process_file(xacro_file).toxml()
 
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'view_arm.rviz')
+
     # 1. Robot State Publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -59,11 +61,32 @@ def generate_launch_description():
         output='screen'
     )
 
+    # 6. Joint State Bridge (Crucial for RViz movement)
+    joint_state_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/model/sliding_arm/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model'],
+        remappings=[('/model/sliding_arm/joint_state', '/joint_states')],
+        output='screen'
+    )
+
+    # 7. RViz2
+    rviz2 = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', rviz_config_file],
+        parameters=[{'use_sim_time': True}],
+        output='screen'
+    )
+
     return LaunchDescription([
         gazebo,
         robot_state_publisher,
         spawn_robot,
         joint_state_broadcaster,
         arm_controller,
-        bridge
+        bridge,
+        joint_state_bridge,
+        rviz2
     ])
