@@ -1,4 +1,11 @@
 # ArUco Detection Parameters
 aruco_node:
   ros__parameters:
-    camera_frame: "camera_link"
+    # Camera frame mappings for multi-camera setup
+    camera_frames:
+      left: "left_camera_link"
+      front: "front_camera_link"
+      right: "right_camera_link"
+    
+    # Frame skipping: 0 = process all frames, 1 = process every other frame, etc.
+    frame_skip: 0

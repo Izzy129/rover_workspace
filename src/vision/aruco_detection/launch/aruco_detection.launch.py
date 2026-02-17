@@ -21,6 +21,12 @@ def generate_launch_description():
         description='Smoothing factor for marker poses (0.0 = infinite smoothing, 1.0 = no smoothing)'
     )
 
+    frame_skip_arg = DeclareLaunchArgument(
+        'frame_skip',
+        default_value='0',
+        description='Frame skip interval (0=process all frames, 1=every other frame, 2=every third frame, etc.)'
+    )
+
     # Get configuration file paths
     aruco_params = os.path.join(
         get_package_share_directory('aruco_detection'),
@@ -42,7 +48,10 @@ def generate_launch_description():
         output='screen',
         parameters=[
             aruco_params,
-            {'smoothing_alpha': LaunchConfiguration('smoothing_alpha')}
+            {
+                'smoothing_alpha': LaunchConfiguration('smoothing_alpha'),
+                'frame_skip': LaunchConfiguration('frame_skip')
+            }
         ]
     )
 
@@ -58,6 +67,7 @@ def generate_launch_description():
     return LaunchDescription([
         use_rviz_arg,
         smoothing_alpha_arg,
+        frame_skip_arg,
         aruco_node,
         rviz_node,
     ])
