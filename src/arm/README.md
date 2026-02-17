@@ -7,7 +7,7 @@ only source files (like package.xml)
 once copied, go back to root directory, and resolve dependencies with rosdep
 
 ```
-rosdep install --from-paths src --ignore-src -r -y                            
+rosdep install --from-paths src --ignore-src -r -y
 ```
 
 then build with 
