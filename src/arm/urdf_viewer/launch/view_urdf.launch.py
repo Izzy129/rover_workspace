@@ -46,12 +46,16 @@ def launch_setup(context):
             output='screen',
         ))
 
-    # RViz2 (no config file — configure displays manually, then save from RViz)
+    # RViz2
+    rviz_config = os.path.join(
+        get_package_share_directory('urdf_viewer'), 'rviz', 'arm_config.rviz'
+    )
     nodes.append(Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
         output='screen',
+        arguments=['-d', rviz_config],
     ))
 
     return nodes

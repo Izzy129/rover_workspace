@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- Generated using onshape-to-robot -->
 <!-- Onshape https://ricerobotics.onshape.com/documents/73f85d42ea83309537336bf0/w/78d26b2e101d193e4048c5b2/e/930bb66fd56aefb4c0af6f33 -->
-<robot name="arm_model_1">
+<robot name="urdf">
   <!-- Link part_1__length_0_5_meter -->
   <link name="part_1__length_0_5_meter">
     <inertial>
@@ -11,7 +11,7 @@
     </inertial>
     <!-- Part part_1__length_0_5_meter -->
     <visual>
-      <origin xyz="-0.01 -0.25 0.01" rpy="-1.5708 1.5708 0"/>
+      <origin xyz="0.01 -0.25 0.01" rpy="1.5708 -0 3.14159"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/part_1__length_0_5_meter.stl"/>
       </geometry>
@@ -20,14 +20,14 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.01 -0.25 0.01" rpy="-1.5708 1.5708 0"/>
+      <origin xyz="0.01 -0.25 0.01" rpy="1.5708 -0 3.14159"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/part_1__length_0_5_meter.stl"/>
       </geometry>
     </collision>
     <!-- Part part_6 -->
     <visual>
-      <origin xyz="-0.04586 0.275 0.02175" rpy="1.5708 1.5708 0"/>
+      <origin xyz="0.02175 0.275 0.04586" rpy="-1.5708 -0 3.14159"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/part_6.stl"/>
       </geometry>
@@ -36,14 +36,14 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.04586 0.275 0.02175" rpy="1.5708 1.5708 0"/>
+      <origin xyz="0.02175 0.275 0.04586" rpy="-1.5708 -0 3.14159"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/part_6.stl"/>
       </geometry>
     </collision>
     <!-- Part part_7 -->
     <visual>
-      <origin xyz="-0.04586 0.270316 0.02175" rpy="1.5708 1.5708 0"/>
+      <origin xyz="0.02175 0.270316 0.04586" rpy="-1.5708 -0 -3.14159"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/part_7.stl"/>
       </geometry>
@@ -52,7 +52,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.04586 0.270316 0.02175" rpy="1.5708 1.5708 0"/>
+      <origin xyz="0.02175 0.270316 0.04586" rpy="-1.5708 -0 -3.14159"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/part_7.stl"/>
       </geometry>
@@ -63,11 +63,11 @@
     <inertial>
       <origin xyz="-0.015875 0.0761547 0.0328074" rpy="0 0 0"/>
       <mass value="0.278123"/>
-      <inertia ixx="0.000850662" ixy="-1.26965e-22" ixz="-6.22527e-20" iyy="0.000375756" iyz="-5.93342e-07" izz="0.000556871"/>
+      <inertia ixx="0.000850662" ixy="-1.05083e-22" ixz="-4.64604e-20" iyy="0.000375756" iyz="-5.93342e-07" izz="0.000556871"/>
     </inertial>
     <!-- Part 6inch_shorter_arm_body_special -->
     <visual>
-      <origin xyz="-0.03175 0.1524 -0.015875" rpy="1.5708 2.18548e-16 6.84408e-33"/>
+      <origin xyz="-0.03175 0.1524 -0.015875" rpy="1.5708 2.18548e-16 2.63027e-32"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body_special.stl"/>
       </geometry>
@@ -76,14 +76,14 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.03175 0.1524 -0.015875" rpy="1.5708 2.18548e-16 6.84408e-33"/>
+      <origin xyz="-0.03175 0.1524 -0.015875" rpy="1.5708 2.18548e-16 2.63027e-32"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body_special.stl"/>
       </geometry>
     </collision>
     <!-- Part 6inch_shorter_arm_body -->
     <visual>
-      <origin xyz="-0.03175 0.1524 0.049625" rpy="1.5708 2.18548e-16 6.84408e-33"/>
+      <origin xyz="-0.03175 0.1524 0.049625" rpy="1.5708 2.18548e-16 2.63027e-32"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body.stl"/>
       </geometry>
@@ -92,7 +92,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.03175 0.1524 0.049625" rpy="1.5708 2.18548e-16 6.84408e-33"/>
+      <origin xyz="-0.03175 0.1524 0.049625" rpy="1.5708 2.18548e-16 2.63027e-32"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body.stl"/>
       </geometry>
@@ -101,13 +101,13 @@
   <!-- Link 20inch_longer_arm_body -->
   <link name="20inch_longer_arm_body">
     <inertial>
-      <origin xyz="1.38778e-17 -0.23495 -0.015875" rpy="0 0 0"/>
+      <origin xyz="0 -0.23495 -0.015875" rpy="0 0 0"/>
       <mass value="0.490242"/>
-      <inertia ixx="0.0102535" ixy="-1.86203e-19" ixz="9.05113e-22" iyy="0.000135645" iyz="3.34087e-34" izz="0.0102555"/>
+      <inertia ixx="0.0102535" ixy="2.80019e-19" ixz="9.05113e-22" iyy="0.000135645" iyz="-4.94891e-34" izz="0.0102555"/>
     </inertial>
     <!-- Part 20inch_longer_arm_body -->
     <visual>
-      <origin xyz="0.041275 0.01905 -0.03175" rpy="1.5708 4.37096e-16 -1.72312e-17"/>
+      <origin xyz="0.041275 0.01905 -0.03175" rpy="1.5708 4.37096e-16 2.70029e-17"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -116,7 +116,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.041275 0.01905 -0.03175" rpy="1.5708 4.37096e-16 -1.72312e-17"/>
+      <origin xyz="0.041275 0.01905 -0.03175" rpy="1.5708 4.37096e-16 2.70029e-17"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -125,13 +125,13 @@
   <!-- Link 6inch_shorter_arm_body_2 -->
   <link name="6inch_shorter_arm_body_2">
     <inertial>
-      <origin xyz="-0.0526454 -0.0222392 -0.016875" rpy="0 0 0"/>
+      <origin xyz="-0.048899 -0.0295805 -0.016875" rpy="0 0 0"/>
       <mass value="0.139231"/>
-      <inertia ixx="7.49195e-05" ixy="-8.51997e-05" ixz="2.76683e-19" iyy="0.000240617" iyz="-6.07648e-19" izz="0.000278678"/>
+      <inertia ixx="0.000102604" ixy="-0.00010526" ixz="3.25314e-19" iyy="0.000212932" iyz="-5.02194e-19" izz="0.000278678"/>
     </inertial>
     <!-- Part 6inch_shorter_arm_body_2 -->
     <visual>
-      <origin xyz="-0.129017 -0.0372676 -0.001" rpy="-1.5708 -2.41288e-15 -1.1711"/>
+      <origin xyz="-0.122315 -0.0554382 -0.001" rpy="-1.5708 -2.16216e-15 -1.02676"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body.stl"/>
       </geometry>
@@ -140,7 +140,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.129017 -0.0372676 -0.001" rpy="-1.5708 -2.41288e-15 -1.1711"/>
+      <origin xyz="-0.122315 -0.0554382 -0.001" rpy="-1.5708 -2.16216e-15 -1.02676"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body.stl"/>
       </geometry>
@@ -156,7 +156,7 @@
     </inertial>
   </link>
   <joint name="closing_shoulder_loop_1_frame" type="fixed">
-    <origin xyz="-0.105291 -0.0444783 -0.001" rpy="4.73085e-16 -2.41288e-15 -1.1711"/>
+    <origin xyz="-0.0977981 -0.059161 -0.001" rpy="4.73045e-16 -2.16216e-15 -1.02676"/>
     <parent link="6inch_shorter_arm_body_2"/>
     <child link="closing_shoulder_loop_1"/>
     <axis xyz="0 0 0"/>
@@ -171,7 +171,7 @@
     </inertial>
   </link>
   <joint name="closing_shoulder_loop_1_z_frame" type="fixed">
-    <origin xyz="-0.105291 -0.0444783 0.099" rpy="4.73085e-16 -2.41288e-15 -1.1711"/>
+    <origin xyz="-0.0977981 -0.059161 0.099" rpy="4.73045e-16 -2.16216e-15 -1.02676"/>
     <parent link="6inch_shorter_arm_body_2"/>
     <child link="closing_shoulder_loop_1_z"/>
     <axis xyz="0 0 0"/>
@@ -179,13 +179,13 @@
   <!-- Link 20inch_longer_arm_body_2 -->
   <link name="20inch_longer_arm_body_2">
     <inertial>
-      <origin xyz="0.177222 0.154253 -0.016875" rpy="0 0 0"/>
+      <origin xyz="0.152784 0.17849 -0.016875" rpy="0 0 0"/>
       <mass value="0.490242"/>
-      <inertia ixx="0.0044968" ixy="-0.00501056" ixz="-1.68523e-18" iyy="0.0058923" iyz="1.48146e-18" izz="0.0102555"/>
+      <inertia ixx="0.00597496" ixy="-0.00499835" ixz="-3.12812e-18" iyy="0.00441414" iyz="2.39047e-18" izz="0.0102555"/>
     </inertial>
     <!-- Part 20inch_longer_arm_body_2 -->
     <visual>
-      <origin xyz="0.341715 0.352146 -0.001" rpy="-1.5708 -2.1689e-16 2.28701"/>
+      <origin xyz="0.2866 0.398292 -0.001" rpy="-1.5708 -3.83372e-16 2.43364"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -194,7 +194,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.341715 0.352146 -0.001" rpy="-1.5708 -2.1689e-16 2.28701"/>
+      <origin xyz="0.2866 0.398292 -0.001" rpy="-1.5708 -3.83372e-16 2.43364"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -210,7 +210,7 @@
     </inertial>
   </link>
   <joint name="closing_elbow_loop_1_frame" type="fixed">
-    <origin xyz="0.354444 0.308505 -0.001" rpy="2.20082e-15 -2.1689e-16 2.28701"/>
+    <origin xyz="0.305568 0.356979 -0.001" rpy="1.60818e-15 -3.83372e-16 2.43364"/>
     <parent link="20inch_longer_arm_body_2"/>
     <child link="closing_elbow_loop_1"/>
     <axis xyz="0 0 0"/>
@@ -225,29 +225,30 @@
     </inertial>
   </link>
   <joint name="closing_elbow_loop_1_z_frame" type="fixed">
-    <origin xyz="0.354444 0.308505 0.099" rpy="2.20082e-15 -2.1689e-16 2.28701"/>
+    <origin xyz="0.305568 0.356979 0.099" rpy="1.60818e-15 -3.83372e-16 2.43364"/>
     <parent link="20inch_longer_arm_body_2"/>
     <child link="closing_elbow_loop_1_z"/>
     <axis xyz="0 0 0"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body_2 to 20inch_longer_arm_body_2 -->
   <joint name="elbow_2" type="revolute">
-    <origin xyz="-0.105291 -0.0444783 -0.03275" rpy="4.73085e-16 -2.41288e-15 -1.1711"/>
+    <origin xyz="-0.0977981 -0.059161 -0.03275" rpy="4.73045e-16 -2.16216e-15 -1.02676"/>
     <parent link="6inch_shorter_arm_body_2"/>
     <child link="20inch_longer_arm_body_2"/>
     <axis xyz="0 0 1"/>
     <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <mimic joint="elbow_1" multiplier="1.0"/>
   </joint>
   <!-- Link 20inch_longer_arm_body_3 -->
   <link name="20inch_longer_arm_body_3">
     <inertial>
-      <origin xyz="0.177222 0.154253 -0.016875" rpy="0 0 0"/>
+      <origin xyz="0.152784 0.17849 -0.016875" rpy="0 0 0"/>
       <mass value="0.490242"/>
-      <inertia ixx="0.0044968" ixy="-0.00501056" ixz="-8.47981e-18" iyy="0.0058923" iyz="9.3023e-18" izz="0.0102555"/>
+      <inertia ixx="0.00597496" ixy="-0.00499835" ixz="-1.08566e-17" iyy="0.00441414" iyz="9.01551e-18" izz="0.0102555"/>
     </inertial>
     <!-- Part 20inch_longer_arm_body_3 -->
     <visual>
-      <origin xyz="0.341715 0.352146 -0.001" rpy="-1.5708 -1.22729e-15 2.28701"/>
+      <origin xyz="0.2866 0.398292 -0.001" rpy="-1.5708 -1.37615e-15 2.43364"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -256,7 +257,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.341715 0.352146 -0.001" rpy="-1.5708 -1.22729e-15 2.28701"/>
+      <origin xyz="0.2866 0.398292 -0.001" rpy="-1.5708 -1.37615e-15 2.43364"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -265,13 +266,13 @@
   <!-- Link 6inch_shorter_arm_body_3 -->
   <link name="6inch_shorter_arm_body_3">
     <inertial>
-      <origin xyz="-0.043108 -0.0375209 -0.016875" rpy="0 0 0"/>
+      <origin xyz="-0.0371637 -0.0434164 -0.016875" rpy="0 0 0"/>
       <mass value="0.139231"/>
-      <inertia ixx="0.000141377" ixy="-0.000117704" ixz="-2.41732e-21" iyy="0.000174159" iyz="-5.78135e-21" izz="0.000278678"/>
+      <inertia ixx="0.000176101" ixy="-0.000117417" ixz="-2.91548e-20" iyy="0.000139435" iyz="2.61525e-20" izz="0.000278678"/>
     </inertial>
     <!-- Part 6inch_shorter_arm_body_3 -->
     <visual>
-      <origin xyz="-0.0901629 -0.0995233 -0.03275" rpy="1.5708 1.00279e-17 2.28701"/>
+      <origin xyz="-0.0746551 -0.111628 -0.03275" rpy="1.5708 -1.41555e-16 2.43364"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body.stl"/>
       </geometry>
@@ -280,7 +281,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="-0.0901629 -0.0995233 -0.03275" rpy="1.5708 1.00279e-17 2.28701"/>
+      <origin xyz="-0.0746551 -0.111628 -0.03275" rpy="1.5708 -1.41555e-16 2.43364"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/6inch_shorter_arm_body.stl"/>
       </geometry>
@@ -296,7 +297,7 @@
     </inertial>
   </link>
   <joint name="closing_elbow_loop_2_frame" type="fixed">
-    <origin xyz="-0.0862161 -0.0750419 5.55112e-17" rpy="-3.14159 -1.44343e-16 -2.42538"/>
+    <origin xyz="-0.0743273 -0.0868328 5.55112e-17" rpy="3.14159 2.33498e-17 -2.27875"/>
     <parent link="6inch_shorter_arm_body_3"/>
     <child link="closing_elbow_loop_2"/>
     <axis xyz="0 0 0"/>
@@ -311,22 +312,23 @@
     </inertial>
   </link>
   <joint name="closing_elbow_loop_2_z_frame" type="fixed">
-    <origin xyz="-0.0862161 -0.0750419 -0.1" rpy="-3.14159 -1.44343e-16 -2.42538"/>
+    <origin xyz="-0.0743273 -0.0868328 -0.1" rpy="3.14159 2.33498e-17 -2.27875"/>
     <parent link="6inch_shorter_arm_body_3"/>
     <child link="closing_elbow_loop_2_z"/>
     <axis xyz="0 0 0"/>
   </joint>
   <!-- Joint from 20inch_longer_arm_body_3 to 6inch_shorter_arm_body_3 -->
   <joint name="elbow_end_1" type="revolute">
-    <origin xyz="0.354444 0.308505 -0.001" rpy="-3.14159 -1.22729e-15 2.28701"/>
+    <origin xyz="0.305568 0.356979 -0.001" rpy="-3.14159 -1.37615e-15 2.43364"/>
     <parent link="20inch_longer_arm_body_3"/>
     <child link="6inch_shorter_arm_body_3"/>
     <axis xyz="0 0 1"/>
     <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <mimic joint="elbow_1" multiplier="1.0"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body_2 to 20inch_longer_arm_body_3 -->
   <joint name="elbow_1" type="revolute">
-    <origin xyz="-7.28584e-17 1.11022e-16 -0.03275" rpy="4.73085e-16 -2.41288e-15 -1.1711"/>
+    <origin xyz="3.22225e-16 3.33067e-16 -0.03275" rpy="4.73045e-16 -2.16216e-15 -1.02676"/>
     <parent link="6inch_shorter_arm_body_2"/>
     <child link="20inch_longer_arm_body_3"/>
     <axis xyz="0 0 1"/>
@@ -334,15 +336,16 @@
   </joint>
   <!-- Joint from 20inch_longer_arm_body to 6inch_shorter_arm_body_2 -->
   <joint name="shoulder_end_1" type="revolute">
-    <origin xyz="-5.37764e-17 -0.4699 0" rpy="3.14159 -3.56188e-33 -1.72312e-17"/>
+    <origin xyz="-8.32667e-17 -0.4699 0" rpy="-3.14159 -2.90661e-32 2.70029e-17"/>
     <parent link="20inch_longer_arm_body"/>
     <child link="6inch_shorter_arm_body_2"/>
     <axis xyz="0 0 1"/>
     <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <mimic joint="shoulder_1" multiplier="1.0"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body to 20inch_longer_arm_body -->
   <joint name="shoulder_1" type="revolute">
-    <origin xyz="-0.015875 0.01905 0.048625" rpy="1.82266e-16 3.51114e-16 -1.1711"/>
+    <origin xyz="-0.015875 0.01905 0.048625" rpy="1.90309e-16 2.77821e-16 -1.02676"/>
     <parent link="6inch_shorter_arm_body"/>
     <child link="20inch_longer_arm_body"/>
     <axis xyz="0 0 1"/>
@@ -351,13 +354,13 @@
   <!-- Link 20inch_longer_arm_body_4 -->
   <link name="20inch_longer_arm_body_4">
     <inertial>
-      <origin xyz="8.32667e-17 0.23495 -0.015875" rpy="0 0 0"/>
+      <origin xyz="9.02056e-17 0.23495 -0.015875" rpy="0 0 0"/>
       <mass value="0.490242"/>
-      <inertia ixx="0.0102535" ixy="-2.11002e-19" ixz="9.05113e-22" iyy="0.000135645" iyz="4.36916e-34" izz="0.0102555"/>
+      <inertia ixx="0.0102535" ixy="-4.50224e-19" ixz="9.05113e-22" iyy="0.000135645" iyz="5.90785e-35" izz="0.0102555"/>
     </inertial>
     <!-- Part 20inch_longer_arm_body_4 -->
     <visual>
-      <origin xyz="0.041275 0.48895 -0.03175" rpy="1.5708 4.37096e-16 -2.04513e-17"/>
+      <origin xyz="0.041275 0.48895 -0.03175" rpy="1.5708 4.37096e-16 -4.4585e-17"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -366,7 +369,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.041275 0.48895 -0.03175" rpy="1.5708 4.37096e-16 -2.04513e-17"/>
+      <origin xyz="0.041275 0.48895 -0.03175" rpy="1.5708 4.37096e-16 -4.4585e-17"/>
       <geometry>
         <mesh filename="package://urdf_viewer/urdf/assets/20inch_longer_arm_body.stl"/>
       </geometry>
@@ -382,7 +385,7 @@
     </inertial>
   </link>
   <joint name="closing_shoulder_loop_2_frame" type="fixed">
-    <origin xyz="9.71445e-17 0.4699 -0.03275" rpy="-4.37096e-16 6.39738e-33 -1.5708"/>
+    <origin xyz="1.38778e-16 0.4699 -0.03275" rpy="-4.37096e-16 -4.05289e-32 -1.5708"/>
     <parent link="20inch_longer_arm_body_4"/>
     <child link="closing_shoulder_loop_2"/>
     <axis xyz="0 0 0"/>
@@ -397,25 +400,26 @@
     </inertial>
   </link>
   <joint name="closing_shoulder_loop_2_z_frame" type="fixed">
-    <origin xyz="1.52656e-16 0.4699 0.06725" rpy="-4.37096e-16 6.39738e-33 -1.5708"/>
+    <origin xyz="1.94289e-16 0.4699 0.06725" rpy="-4.37096e-16 -4.05289e-32 -1.5708"/>
     <parent link="20inch_longer_arm_body_4"/>
     <child link="closing_shoulder_loop_2_z"/>
     <axis xyz="0 0 0"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body to 20inch_longer_arm_body_4 -->
   <joint name="shoulder_2" type="revolute">
-    <origin xyz="-0.015875 0.13335 0.016875" rpy="-3.14159 7.88209e-16 -1.1711"/>
+    <origin xyz="-0.015875 0.13335 0.016875" rpy="-3.14159 7.57238e-16 -1.02676"/>
     <parent link="6inch_shorter_arm_body"/>
     <child link="20inch_longer_arm_body_4"/>
     <axis xyz="0 0 1"/>
     <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <mimic joint="shoulder_1" multiplier="-1.0"/>
   </joint>
   <!-- Joint from part_1__length_0_5_meter to 6inch_shorter_arm_body -->
   <joint name="slider" type="prismatic">
-    <origin xyz="-0.08599 0.0510785 0.0762" rpy="-1.5708 6.62236e-16 -2.49816e-16"/>
+    <origin xyz="0.0762 0.075 0.08599" rpy="-1.5708 1.5708 0"/>
     <parent link="part_1__length_0_5_meter"/>
     <child link="6inch_shorter_arm_body"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-0.226078" upper="0.0239215"/>
+    <limit effort="10" velocity="10" lower="-0.25" upper="1.66533e-16"/>
   </joint>
 </robot>
