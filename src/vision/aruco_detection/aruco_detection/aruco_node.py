@@ -1,29 +1,42 @@
 """
-This node locates Aruco AR markers in images and publishes their ids and poses.
+This node locates Aruco AR markers in images from multiple cameras and publishes their ids and poses.
 
 Subscriptions:
-   /camera/image_raw (sensor_msgs.msg.Image)
-   /camera/camera_info (sensor_msgs.msg.CameraInfo)
+   /camera_left/image_raw (sensor_msgs.msg.Image)
+   /camera_left/camera_info (sensor_msgs.msg.CameraInfo)
+   /camera_front/image_raw (sensor_msgs.msg.Image)
+   /camera_front/camera_info (sensor_msgs.msg.CameraInfo)
+   /camera_right/image_raw (sensor_msgs.msg.Image)
+   /camera_right/camera_info (sensor_msgs.msg.CameraInfo)
 
 Published Topics:
-    /aruco_poses (geometry_msgs.msg.PoseArray)
+    /camera_left/aruco_poses (geometry_msgs.msg.PoseArray)
+       Pose of all detected markers (suitable for rviz visualization)
+    /camera_front/aruco_poses (geometry_msgs.msg.PoseArray)
+       Pose of all detected markers (suitable for rviz visualization)
+    /camera_right/aruco_poses (geometry_msgs.msg.PoseArray)
        Pose of all detected markers (suitable for rviz visualization)
 
-    /aruco_markers (aruco_detection_interfaces.msg.ArucoMarkers)
-       Provides an array of all poses along with the corresponding
-       marker ids.
+    /camera_left/aruco_markers (vision_interfaces.msg.ArucoMarkers)
+       Provides an array of all poses along with the corresponding marker ids
+    /camera_front/aruco_markers (vision_interfaces.msg.ArucoMarkers)
+       Provides an array of all poses along with the corresponding marker ids
+    /camera_right/aruco_markers (vision_interfaces.msg.ArucoMarkers)
+       Provides an array of all poses along with the corresponding marker ids
+
+    /camera_left/aruco_detection/image (sensor_msgs.msg.Image)
+       Debug image with detected markers and coordinate axes
+    /camera_front/aruco_detection/image (sensor_msgs.msg.Image)
+       Debug image with detected markers and coordinate axes
+    /camera_right/aruco_detection/image (sensor_msgs.msg.Image)
+       Debug image with detected markers and coordinate axes
 
 Parameters:
-    marker_size - size of the markers in meters (default .0625)
-    aruco_dictionary_id - dictionary that was used to generate markers
-                          (default DICT_4X4_50)
-    image_topic - image topic to subscribe to (default /camera/image_raw)
-    camera_info_topic - camera info topic to subscribe to
-                         (default /camera/camera_info)
-
-Author: Nathan Sprague
-Version: 10/26/2020
-
+    marker_size - size of the markers in meters (default 0.02)
+    aruco_dictionary_id - dictionary that was used to generate markers (default DICT_4X4_50)
+    camera_frames - mapping of camera names to frame IDs
+    frame_skip - frame skipping interval (0 = process all frames)
+    smoothing_alpha - pose smoothing factor (0.7 default)
 """
 
 import rclpy
@@ -55,14 +68,33 @@ class ArucoNode(rclpy.node.Node):
     def __init__(self):
         super().__init__("aruco_node")
 
-        self.declare_parameter(
-            name="camera_frame",
-            value="",
-            descriptor=ParameterDescriptor(
-                type=ParameterType.PARAMETER_STRING,
-                description="Camera optical frame to use.",
-            ),
-        )
+        self.camera_names = ['left', 'front', 'right']
+
+        # Declare individual camera frame parameters
+        self.declare_parameter("camera_frames.left", "left_camera_link")
+        self.declare_parameter("camera_frames.front", "front_camera_link")
+        self.declare_parameter("camera_frames.right", "right_camera_link")
+
+        # frame skip parameter
+        self.declare_parameter("frame_skip", 0)
+        self.frame_skip = self.get_parameter("frame_skip").get_parameter_value().integer_value
+        self.get_logger().info(f"Frame skip: {self.frame_skip}")
+
+        # smoothing parameter
+        self.declare_parameter("smoothing_alpha", 0.7)
+        self.smoothing_alpha = self.get_parameter("smoothing_alpha").get_parameter_value().double_value
+        self.get_logger().info(f"Smoothing alpha: {self.smoothing_alpha}")
+
+        # get camera frames from parameters
+        self.camera_frames = {}
+        for camera in self.camera_names:
+            param_name = f"camera_frames.{camera}"
+            self.camera_frames[camera] = self.get_parameter(param_name).get_parameter_value().string_value
+            if not self.camera_frames[camera]:
+                self.get_logger().error(f"Missing camera_frame for {camera}")
+                raise ValueError(f"camera_frames.{camera} not defined in parameters")
+
+        self.get_logger().info(f"Camera frames: {self.camera_frames}")
 
         self.marker_size = 0.02 # meters
         self.get_logger().info(f"Marker size: {self.marker_size}")
@@ -70,71 +102,90 @@ class ArucoNode(rclpy.node.Node):
         self.marker_family = 'DICT_4X4_50'
         self.get_logger().info(f"Marker type: {self.marker_family}")
 
-        image_topic = '/image_raw'
-        self.get_logger().info(f"Image topic: {image_topic}")
-
-        info_topic = 'camera_info'
-        self.get_logger().info(f"Image info topic: {info_topic}")
-
-        self.declare_parameter("smoothing_alpha", 0.7)
-        self.smoothing_alpha = self.get_parameter("smoothing_alpha").get_parameter_value().double_value
-        self.get_logger().info(f"Smoothing alpha: {self.smoothing_alpha}")
-
-        self.camera_frame = (
-            self.get_parameter("camera_frame").get_parameter_value().string_value
-        )
-
-        # Set up subscriptions
-        self.info_sub = self.create_subscription(
-            CameraInfo, info_topic, self.info_callback, qos_profile_sensor_data
-        )
-
-        self.create_subscription(
-            Image, image_topic, self.image_callback, qos_profile_sensor_data
-        )
-
-        # Set up publishers
-        self.poses_pub = self.create_publisher(PoseArray, "aruco_poses", 10)
-        self.markers_pub = self.create_publisher(ArucoMarkers, "aruco_markers", 10)
-        self.image_pub = self.create_publisher(Image, "aruco_detection/image", 10)
-
-        # Set up fields for camera parameters
-        self.info_msg = None
-        self.intrinsic_mat = None
-        self.distortion = None
-
         dictionary_id = cv2.aruco.__getattribute__(self.marker_family)
         self.aruco_dictionary = cv2.aruco.getPredefinedDictionary(dictionary_id)
         self.aruco_parameters = cv2.aruco.DetectorParameters()
         self.detector = cv2.aruco.ArucoDetector(self.aruco_dictionary, self.aruco_parameters)
         self.bridge = CvBridge()
-        
-        # Dictionary to store the previous smoothed pose for each marker ID
-        # Format: {marker_id: (position_np_array, orientation_quaternion_np_array)}
-        self.pose_tracker = {}
 
-    def info_callback(self, info_msg):
-        self.info_msg = info_msg
-        self.intrinsic_mat = np.reshape(np.array(self.info_msg.k), (3, 3))
-        self.distortion = np.array(self.info_msg.d)
+        # Per-camera state storage
+        self.camera_infos = {camera: None for camera in self.camera_names}
+        self.intrinsic_mats = {camera: None for camera in self.camera_names}
+        self.distortions = {camera: None for camera in self.camera_names}
+        self.pose_trackers = {camera: {} for camera in self.camera_names}  # {camera: {marker_id: (pos, quat)}}
+        self.frame_counters = {camera: 0 for camera in self.camera_names}
+        self.info_subs = {}  # Store info subscriptions to destroy after first message
+
+        # Create subscriptions and publishers for each camera
+        for camera in self.camera_names:
+            image_topic = f'/camera_{camera}/image_raw'
+            info_topic = f'/camera_{camera}/camera_info'
+
+            self.get_logger().info(f"Subscribing to {camera} camera:")
+            self.get_logger().info(f"  Image topic: {image_topic}")
+            self.get_logger().info(f"  Info topic: {info_topic}")
+
+            # Subscribe to camera info (will be destroyed after first message)
+            self.info_subs[camera] = self.create_subscription(
+                CameraInfo, 
+                info_topic, 
+                lambda msg, cam=camera: self.info_callback(msg, cam),
+                qos_profile_sensor_data
+            )
+
+            # Subscribe to raw image
+            self.create_subscription(
+                Image, 
+                image_topic, 
+                lambda msg, cam=camera: self.image_callback(msg, cam),
+                qos_profile_sensor_data
+            )
+
+        # Create publishers for each camera
+        self.poses_pubs = {}
+        self.markers_pubs = {}
+        self.image_pubs = {}
+
+        for camera in self.camera_names:
+            self.poses_pubs[camera] = self.create_publisher(
+                PoseArray, f"/camera_{camera}/aruco_poses", 10
+            )
+            self.markers_pubs[camera] = self.create_publisher(
+                ArucoMarkers, f"/camera_{camera}/aruco_markers", 10
+            )
+            self.image_pubs[camera] = self.create_publisher(
+                Image, f"/camera_{camera}/aruco_detection/image", 10
+            )
+
+        self.get_logger().info(f"Multi-camera ArUco node initialized for {len(self.camera_names)} cameras")
+
+    def info_callback(self, info_msg, camera):
+        """Store camera info for a specific camera and unsubscribe."""
+        self.camera_infos[camera] = info_msg
+        self.intrinsic_mats[camera] = np.reshape(np.array(info_msg.k), (3, 3))
+        self.distortions[camera] = np.array(info_msg.d)
         # Assume that camera parameters will remain the same...
-        self.destroy_subscription(self.info_sub)
+        self.destroy_subscription(self.info_subs[camera])
+        self.get_logger().info(f"Camera info received for {camera} camera")
 
-    def image_callback(self, img_msg):
-        if self.info_msg is None:
-            self.get_logger().warn("No camera info has been received!")
+    def image_callback(self, img_msg, camera):
+        """Process image from a specific camera and detect ArUco markers."""
+        # Check if camera info has been received
+        if self.camera_infos[camera] is None:
+            self.get_logger().warn(f"No camera info received for {camera} camera yet!")
+            return
+
+        # Frame skipping logic
+        self.frame_counters[camera] += 1
+        if self.frame_skip > 0 and self.frame_counters[camera] % (self.frame_skip + 1) != 0:
             return
 
         cv_image = self.bridge.imgmsg_to_cv2(img_msg)
         markers = ArucoMarkers()
         pose_array = PoseArray()
-        if self.camera_frame == "":
-            markers.header.frame_id = self.info_msg.header.frame_id
-            pose_array.header.frame_id = self.info_msg.header.frame_id
-        else:
-            markers.header.frame_id = self.camera_frame
-            pose_array.header.frame_id = self.camera_frame
-
+        # Set frame_id from camera configuration
+        markers.header.frame_id = self.camera_frames[camera]
+        pose_array.header.frame_id = self.camera_frames[camera]
         markers.header.stamp = img_msg.header.stamp
         pose_array.header.stamp = img_msg.header.stamp
 
@@ -160,12 +211,12 @@ class ArucoNode(rclpy.node.Node):
                 # Solve PnP to get pose
                 success, rvec, tvec = cv2.solvePnP(
                     object_points, image_points, 
-                    self.intrinsic_mat, self.distortion
+                    self.intrinsic_mats[camera], self.distortions[camera]
                 )
                 
                 if success:
                     # Draw coordinate axes on the marker
-                    cv2.drawFrameAxes(output, self.intrinsic_mat, self.distortion, 
+                    cv2.drawFrameAxes(output, self.intrinsic_mats[camera], self.distortions[camera], 
                                     rvec, tvec, self.marker_size * 1.5, 2)
                     
                     pose = Pose()
@@ -179,8 +230,8 @@ class ArucoNode(rclpy.node.Node):
 
                     # Apply smoothing if available
                     key = marker_id[0]
-                    if key in self.pose_tracker:
-                        prev_pos, prev_quat = self.pose_tracker[key]
+                    if key in self.pose_trackers[camera]:
+                        prev_pos, prev_quat = self.pose_trackers[camera][key]
                         
                         # Smooth position (linear interpolation)
                         alpha = self.smoothing_alpha
@@ -189,7 +240,7 @@ class ArucoNode(rclpy.node.Node):
                         # Smooth orientation (SLERP)
                         new_quat = tf_transformations.quaternion_slerp(prev_quat, curr_quat, alpha)
                         
-                        self.pose_tracker[key] = (new_pos, new_quat)
+                        self.pose_trackers[camera][key] = (new_pos, new_quat)
                         
                         pose.position.x = new_pos[0]
                         pose.position.y = new_pos[1]
@@ -200,7 +251,7 @@ class ArucoNode(rclpy.node.Node):
                         pose.orientation.w = new_quat[3]
                     else:
                         # First time seeing this marker, no smoothing
-                        self.pose_tracker[key] = (curr_pos, curr_quat)
+                        self.pose_trackers[camera][key] = (curr_pos, curr_quat)
                         
                         pose.position.x = curr_pos[0]
                         pose.position.y = curr_pos[1]
@@ -214,16 +265,17 @@ class ArucoNode(rclpy.node.Node):
                     markers.poses.append(pose)
                     markers.marker_ids.append(marker_id[0])
 
-            self.poses_pub.publish(pose_array)
-            self.markers_pub.publish(markers)
+            self.poses_pubs[camera].publish(pose_array)
+            self.markers_pubs[camera].publish(markers)
 
         # Publish annotated image for RViz visualization
         output_msg = self.bridge.cv2_to_imgmsg(output, encoding='bgr8')
         output_msg.header = img_msg.header
-        self.image_pub.publish(output_msg)
+        self.image_pubs[camera].publish(output_msg)
 
         # Display the image with markers and axes
-        cv2.imshow("Detected Markers", output)
+        window_name = f"ArUco - {camera.capitalize()} Camera"
+        cv2.imshow(window_name, output)
         cv2.waitKey(1)
 
 
