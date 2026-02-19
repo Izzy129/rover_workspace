@@ -19,6 +19,9 @@ class ArmKeyboardTeleop(Node):
         self.declare_parameter('slider_step', 0.005)
         self.declare_parameter('shoulder_step', 0.03)
         self.declare_parameter('elbow_step', 0.03)
+        self.declare_parameter('slider_vel', 0.04)
+        self.declare_parameter('shoulder_vel', 0.8)
+        self.declare_parameter('elbow_vel', 0.8)
         self.declare_parameter('slider_limits', [-0.25, 0.0])
         self.declare_parameter('shoulder_limits', [-3.14159, 3.14159])
         self.declare_parameter('elbow_limits', [-3.14159, 3.14159])
@@ -41,15 +44,26 @@ class ArmKeyboardTeleop(Node):
             self.elbow_limits,
         ]
 
-        # Step sizes per joint index
+        # Step sizes per joint index (position mode)
         self.steps = [self.slider_step, self.shoulder_step, self.elbow_step]
 
-        # Current desired positions
+        # Velocity targets per joint index (velocity mode)
+        self.vel_targets = [
+            self.get_parameter('slider_vel').value,
+            self.get_parameter('shoulder_vel').value,
+            self.get_parameter('elbow_vel').value,
+        ]
+
+        # Current desired positions (position mode)
         self.positions = [0.0, 0.0, 0.0]
 
-        # Active deltas set by keyboard thread
+        # Active deltas (position mode) or velocity commands (velocity mode)
         self.deltas = [0.0, 0.0, 0.0]
+        self.vel_commands = [0.0, 0.0, 0.0]
         self.lock = threading.Lock()
+
+        # Control mode: 'position' or 'velocity'
+        self.mode = 'velocity'
 
         # Publisher
         self.cmd_pub = self.create_publisher(JointState, '/arm_joint_commands', 10)
@@ -84,8 +98,11 @@ class ArmKeyboardTeleop(Node):
         print('  w/s : slider up/down')
         print('  a/d : shoulder left/right')
         print('  j/l : elbow left/right')
+        print('  v   : toggle pos/vel mode')
         print('  0   : zero all joints')
         print('  q   : quit')
+        print('---------------------------')
+        print(f'  Mode: {self.mode}')
         print('---------------------------')
         sys.stdout.flush()
 
@@ -103,9 +120,10 @@ class ArmKeyboardTeleop(Node):
                     key = sys.stdin.read(1)
                     self.handle_key(key)
                 else:
-                    # No key pressed, clear deltas
+                    # No key pressed, clear active commands
                     with self.lock:
                         self.deltas = [0.0, 0.0, 0.0]
+                        self.vel_commands = [0.0, 0.0, 0.0]
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
@@ -115,10 +133,23 @@ class ArmKeyboardTeleop(Node):
             rclpy.shutdown()
             return
 
+        if key == 'v':
+            with self.lock:
+                if self.mode == 'position':
+                    self.mode = 'velocity'
+                else:
+                    self.mode = 'position'
+                self.deltas = [0.0, 0.0, 0.0]
+                self.vel_commands = [0.0, 0.0, 0.0]
+            sys.stdout.write(f'\r\nMode: {self.mode}\r\n')
+            sys.stdout.flush()
+            return
+
         if key == '0':
             with self.lock:
                 self.positions = [0.0, 0.0, 0.0]
                 self.deltas = [0.0, 0.0, 0.0]
+                self.vel_commands = [0.0, 0.0, 0.0]
             sys.stdout.write('\r\nZeroed all joints\r\n')
             sys.stdout.flush()
             return
@@ -126,22 +157,30 @@ class ArmKeyboardTeleop(Node):
         if key in self.key_map:
             joint_idx, direction = self.key_map[key]
             with self.lock:
-                self.deltas = [0.0, 0.0, 0.0]
-                self.deltas[joint_idx] = direction * self.steps[joint_idx]
+                if self.mode == 'position':
+                    self.deltas = [0.0, 0.0, 0.0]
+                    self.deltas[joint_idx] = direction * self.steps[joint_idx]
+                else:
+                    self.vel_commands = [0.0, 0.0, 0.0]
+                    self.vel_commands[joint_idx] = direction * self.vel_targets[joint_idx]
 
     def publish_command(self):
-        with self.lock:
-            # Apply deltas
-            for i in range(3):
-                self.positions[i] += self.deltas[i]
-                # Clamp to limits
-                self.positions[i] = max(self.limits[i][0],
-                                        min(self.limits[i][1], self.positions[i]))
-
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.name = list(self.joint_names)
-        msg.position = list(self.positions)
+
+        with self.lock:
+            if self.mode == 'position':
+                # Apply deltas and clamp
+                for i in range(3):
+                    self.positions[i] += self.deltas[i]
+                    self.positions[i] = max(self.limits[i][0],
+                                            min(self.limits[i][1], self.positions[i]))
+                msg.position = list(self.positions)
+            else:
+                # Velocity mode: send desired velocities
+                msg.velocity = list(self.vel_commands)
+
         self.cmd_pub.publish(msg)
 
 

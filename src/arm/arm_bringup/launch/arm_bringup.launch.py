@@ -20,6 +20,8 @@ def generate_launch_description():
     # Package paths
     urdf_viewer_path = get_package_share_directory('urdf_viewer')
     arm_bringup_path = get_package_share_directory('arm_bringup')
+    arm_teleop_path = get_package_share_directory('arm_teleop')
+    params_file = os.path.join(arm_teleop_path, 'config', 'teleop_params.yaml')
 
     # Load URDF
     urdf_file = os.path.join(urdf_viewer_path, 'urdf', 'robot.urdf')
@@ -38,6 +40,7 @@ def generate_launch_description():
         package='arm_teleop',
         executable='sim_driver.py',
         name='arm_sim_driver',
+        parameters=[params_file],
         output='screen',
         condition=IfCondition(LaunchConfiguration('use_sim')),
     )
