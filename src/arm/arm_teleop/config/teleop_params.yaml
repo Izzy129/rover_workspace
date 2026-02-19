@@ -1,0 +1,10 @@
+arm_keyboard_teleop:
+  ros__parameters:
+    joint_names: [slider, shoulder_1, elbow_1]
+    slider_step: 0.005
+    shoulder_step: 0.03
+    elbow_step: 0.03
+    slider_limits: [-0.25, 0.0]
+    shoulder_limits: [-3.14159, 3.14159]
+    elbow_limits: [-3.14159, 3.14159]
+    publish_rate: 20.0
