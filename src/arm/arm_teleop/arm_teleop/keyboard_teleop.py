@@ -73,8 +73,8 @@ class ArmKeyboardTeleop(Node):
 
         # Key mapping: key -> (joint_index, direction)
         self.key_map = {
-            'w': (0, 1.0),   # slider up
-            's': (0, -1.0),  # slider down
+            'w': (0, -1.0),  # slider down
+            's': (0, 1.0),   # slider up
             'a': (1, 1.0),   # shoulder left
             'd': (1, -1.0),  # shoulder right
             'j': (2, 1.0),   # elbow left
