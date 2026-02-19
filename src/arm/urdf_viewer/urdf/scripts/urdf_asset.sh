@@ -8,6 +8,8 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 URDF_FILE="$SCRIPT_DIR/../robot.urdf"
 
+onshape-to-robot $SCRIPT_DIR/../
+
 if [ ! -f "$URDF_FILE" ]; then
     echo "Error: robot.urdf not found at $URDF_FILE"
     exit 1

@@ -1,6 +1,6 @@
 # urdf_viewer
 
-Generic URDF visualization tool. Launches `robot_state_publisher`, `joint_state_publisher_gui`, and RViz2 to view any URDF/xacro file with interactive joint sliders.
+URDF visualization tool for the rover arm. Launches `robot_state_publisher`, `joint_state_publisher_gui`, and RViz2 with a preconfigured view to visualize the arm URDF with interactive joint sliders.
 
 ## Build
 
@@ -12,11 +12,11 @@ source install/setup.bash
 ## Usage
 
 ```bash
-# View the default arm (sliding_arm.urdf.xacro from arm_description)
+# View the arm URDF (default)
 ros2 launch urdf_viewer view_urdf.launch.py
 
-# View any URDF file
-ros2 launch urdf_viewer view_urdf.launch.py urdf_file:=src/arm/urdf_viewer/urdf/robot.urdf
+# View any other URDF file
+ros2 launch urdf_viewer view_urdf.launch.py urdf_file:=/absolute/path/to/robot.urdf
 
 # View a xacro file
 ros2 launch urdf_viewer view_urdf.launch.py urdf_file:=/absolute/path/to/robot.urdf.xacro
@@ -25,23 +25,30 @@ ros2 launch urdf_viewer view_urdf.launch.py urdf_file:=/absolute/path/to/robot.u
 ros2 launch urdf_viewer view_urdf.launch.py gui:=false
 ```
 
-## Setting Up RViz Displays
+## Updating the Arm URDF
 
-RViz opens with a blank config. To visualize your robot:
+The arm URDF is generated from the Onshape CAD model using [onshape-to-robot](https://onshape-to-robot.readthedocs.io/en/latest/getting_started.html). To update the URDF after CAD changes:
 
-1. In the **Displays** panel (left side), click **Add** at the bottom
-2. Add a **RobotModel** display:
-   - Set **Description Source** to `Topic`
-   - Set **Description Topic** to `/robot_description`
-3. Add a **TF** display to see the transform frames
-4. In **Global Options** (top of Displays panel), set **Fixed Frame** to your URDF's root link (commonly `world` or `base_link`)
-5. Optionally add a **Grid** display for spatial reference
+1. Make sure `onshape-to-robot` is installed and configured with your Onshape API keys (see the [getting started guide](https://onshape-to-robot.readthedocs.io/en/latest/getting_started.html))
 
-Once configured, save your RViz setup via **File > Save Config As** so you can reuse it later.
+2. Run the update script from anywhere in the workspace:
+   ```bash
+   bash src/arm/urdf_viewer/urdf/scripts/urdf_asset.sh
+   ```
+
+   This script will:
+   - Run `onshape-to-robot` to pull the latest URDF and mesh assets from Onshape
+   - Fix mesh paths in `robot.urdf` to use the correct ROS package paths (`package://urdf_viewer/urdf/assets/`)
+
+3. Rebuild the package to install the updated files:
+   ```bash
+   colcon build --packages-select urdf_viewer
+   source install/setup.bash
+   ```
 
 ## Launch Arguments
 
-| Argument    | Default                                        | Description                              |
-|-------------|-------------------------------------------------|------------------------------------------|
-| `urdf_file` | `arm_description/urdf/sliding_arm.urdf.xacro`  | Absolute path to `.urdf` or `.xacro` file |
-| `gui`       | `true`                                          | Launch joint slider GUI (`true`/`false`)  |
+| Argument    | Default                              | Description                              |
+|-------------|--------------------------------------|------------------------------------------|
+| `urdf_file` | `urdf_viewer/urdf/robot.urdf`       | Absolute path to `.urdf` or `.xacro` file |
+| `gui`       | `true`                               | Launch joint slider GUI (`true`/`false`)  |
