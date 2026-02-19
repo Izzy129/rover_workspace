@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arm_gazebo">
+
+  <!-- Include the CAD-derived URDF from urdf_viewer (unmodified) -->
+  <xacro:include filename="$(find urdf_viewer)/urdf/robot.urdf"/>
+
+  <!-- Anchor the arm base to the world so it doesn't fall under gravity -->
+  <link name="world"/>
+  <joint name="world_fixed" type="fixed">
+    <parent link="world"/>
+    <child link="part_1__length_0_5_meter"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!--
+    ros2_control hardware interface for Gazebo.
+
+    Active joints (velocity commanded):
+      - slider       (prismatic)
+      - shoulder_1   (revolute)
+      - elbow_1      (revolute)
+
+    Mimic joints (velocity derived from primary via multiplier):
+      - shoulder_2     mirrors shoulder_1, multiplier: -1.0
+      - shoulder_end_1 mirrors shoulder_1, multiplier:  1.0
+      - elbow_2        mirrors elbow_1,    multiplier:  1.0
+      - elbow_end_1    mirrors elbow_1,    multiplier:  1.0
+  -->
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <!-- Active joints -->
+    <joint name="slider">
+      <command_interface name="velocity">
+        <param name="min">-0.05</param>
+        <param name="max">0.05</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="shoulder_1">
+      <command_interface name="velocity">
+        <param name="min">-0.67</param>
+        <param name="max">0.67</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="elbow_1">
+      <command_interface name="velocity">
+        <param name="min">-0.67</param>
+        <param name="max">0.67</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Mimic joints: no command interfaces allowed — hardware interface drives
+         them automatically based on the URDF <mimic> tag relationships. -->
+    <joint name="shoulder_2">
+      <param name="mimic">shoulder_1</param>
+      <param name="multiplier">-1.0</param>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="shoulder_end_1">
+      <param name="mimic">shoulder_1</param>
+      <param name="multiplier">1.0</param>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="elbow_2">
+      <param name="mimic">elbow_1</param>
+      <param name="multiplier">1.0</param>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="elbow_end_1">
+      <param name="mimic">elbow_1</param>
+      <param name="multiplier">1.0</param>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+  </ros2_control>
+
+  <!-- Gazebo plugin: loads ros2_control hardware and controller manager -->
+  <gazebo>
+    <plugin filename="libgz_ros2_control-system.so"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find arm_gazebo)/config/arm_controllers.yaml</parameters>
+      <ros>
+        <remapping>~/robot_description:=/robot_description</remapping>
+      </ros>
+    </plugin>
+  </gazebo>
+
+  <!-- Damping and friction for realistic joint behaviour -->
+  <gazebo reference="shoulder_1">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="shoulder_2">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="shoulder_end_1">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="elbow_1">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="elbow_2">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="elbow_end_1">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+
+</robot>
