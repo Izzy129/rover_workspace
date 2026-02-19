@@ -18,6 +18,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   arm_teleop/keyboard_teleop.py
   arm_teleop/sim_driver.py
+  arm_teleop/gazebo_bridge.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

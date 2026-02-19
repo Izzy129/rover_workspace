@@ -93,6 +93,33 @@ ros2 run arm_teleop sim_driver.py
 | `shoulder_limits` | `[-3.14159, 3.14159]` | Shoulder limits (rad) |
 | `elbow_limits` | `[-3.14159, 3.14159]` | Elbow limits (rad) |
 
+### gazebo_bridge.py
+
+Translates `/arm_joint_commands` into the `Float64MultiArray` format expected by the `ros2_control` `ForwardCommandController` running inside Gazebo.
+
+This node is launched automatically by `arm_gazebo` with a 5-second delay to ensure `arm_vel_controller` is active before commands flow through. It is not used in the lightweight `arm_bringup` sim.
+
+```bash
+# Usually launched via arm_gazebo, but can be run standalone:
+ros2 run arm_teleop gazebo_bridge.py
+```
+
+#### Subscribed Topics
+
+| Topic | Type | Description |
+|-------|------|-------------|
+| `/arm_joint_commands` | `sensor_msgs/JointState` | Velocity commands from keyboard teleop |
+
+#### Published Topics
+
+| Topic | Type | Description |
+|-------|------|-------------|
+| `/arm_vel_controller/commands` | `std_msgs/Float64MultiArray` | Velocity commands for ros2_control |
+
+#### Parameters
+
+Shares `config/teleop_params.yaml` with the other teleop nodes. Joint name order must match the `arm_vel_controller` configuration in `arm_gazebo`.
+
 ## Configuration
 
 All parameters are in [`config/teleop_params.yaml`](config/teleop_params.yaml), loaded by the launch files.

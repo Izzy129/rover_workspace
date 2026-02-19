@@ -1,0 +1,20 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    arm_vel_controller:
+      type: forward_command_controller/ForwardCommandController
+
+# Velocity controller for the 3 active joints.
+# Publishes to: /arm_vel_controller/commands (std_msgs/Float64MultiArray)
+# Joint order: [slider, shoulder_1, elbow_1]
+arm_vel_controller:
+  ros__parameters:
+    joints:
+      - slider
+      - shoulder_1
+      - elbow_1
+    interface_name: velocity

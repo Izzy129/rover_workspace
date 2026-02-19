@@ -16,11 +16,23 @@ source install/setup.bash
 
 ## Quick Start
 
+### Lightweight sim (no physics, fast startup)
+
 ```bash
 # Terminal 1: launch robot_state_publisher, sim driver, and RViz
 ros2 launch arm_bringup arm_bringup.launch.py
 
 # Terminal 2: keyboard teleop (must be ros2 run, not launch, for TTY access)
+ros2 run arm_teleop keyboard_teleop.py
+```
+
+### Gazebo physics sim (ros2_control, full physics)
+
+```bash
+# Terminal 1: launch Gazebo + controllers + RViz
+ros2 launch arm_gazebo arm_gazebo.launch.py
+
+# Terminal 2: keyboard teleop
 ros2 run arm_teleop keyboard_teleop.py
 ```
 
@@ -41,23 +53,44 @@ q    - quit
 
 ## Architecture
 
+### Lightweight sim (`arm_bringup`)
+
 ```
 keyboard_teleop ──/arm_joint_commands──> sim_driver ──/joint_states──> robot_state_publisher ──> RViz
 ```
 
-- **arm_teleop**: Keyboard teleop node and sim driver node
-- **arm_bringup**: Launch orchestration (robot_state_publisher + sim_driver + RViz)
+### Gazebo physics sim (`arm_gazebo`)
+
+```
+keyboard_teleop
+    ↓ /arm_joint_commands
+gazebo_bridge.py
+    ↓ /arm_vel_controller/commands
+arm_vel_controller (ForwardCommandController)
+    ↓
+Gazebo physics
+    ↓
+joint_state_broadcaster
+    ↓ /joint_states
+robot_state_publisher
+    ↓ /tf
+RViz2
+```
+
+- **arm_teleop**: Keyboard teleop node, sim driver, and Gazebo bridge
+- **arm_bringup**: Launch orchestration for lightweight sim (robot_state_publisher + sim_driver + RViz)
+- **arm_gazebo**: Physics-based Gazebo sim with ros2_control
 - **urdf_viewer**: Real CAD-derived URDF from Onshape (used as-is)
-- **arm_description**: Legacy Gazebo sim package (not used by teleop)
 
 ## Packages
 
 | Package | Description | Details |
 |---------|-------------|---------|
-| [arm_teleop](arm_teleop/) | Teleop node + sim driver | Keyboard control, simulated motor behavior |
-| [arm_bringup](arm_bringup/) | Launch orchestration | Full system launch with RViz |
+| [arm_teleop](arm_teleop/) | Teleop node + sim driver | Keyboard control, simulated motor behavior, Gazebo bridge |
+| [arm_bringup](arm_bringup/) | Lightweight sim launch | robot_state_publisher + sim_driver + RViz |
+| [arm_gazebo](arm_gazebo/) | Gazebo physics sim | ros2_control, ForwardCommandController, full physics |
 | [urdf_viewer](urdf_viewer/) | URDF visualization | Interactive joint sliders, CAD-derived URDF |
-| [arm_description](arm_description/) | Gazebo sim (legacy) | Not used by current teleop system |
+| [arm_description](arm_description/) | Gazebo sim (legacy) | Superseded by arm_gazebo |
 
 ## Path to Real Hardware
 

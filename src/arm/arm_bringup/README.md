@@ -46,6 +46,17 @@ ros2 run arm_teleop keyboard_teleop.py
 
 Uses the real CAD-derived URDF from the `urdf_viewer` package (`urdf/robot.urdf`). No separate URDF is maintained in this package.
 
+## Gazebo Alternative
+
+This package uses a lightweight kinematic sim (`sim_driver.py`) with no physics engine. For full physics simulation with `ros2_control`, use `arm_gazebo` instead:
+
+```bash
+# Physics sim with Gazebo
+ros2 launch arm_gazebo arm_gazebo.launch.py
+```
+
+See [arm_gazebo/README.md](../arm_gazebo/README.md) for details.
+
 ## Debugging
 
 ```bash
