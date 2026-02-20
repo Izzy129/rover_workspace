@@ -15,7 +15,7 @@ class ArmKeyboardTeleop(Node):
         super().__init__('arm_keyboard_teleop')
 
         # Declare parameters
-        self.declare_parameter('joint_names', ['slider', 'shoulder_1', 'elbow_1'])
+        self.declare_parameter('joint_names', ['slider', 'shoulder_1', 'elbow_1', 'wrist', 'claw'])
         self.declare_parameter('slider_step', 0.005)
         self.declare_parameter('shoulder_step', 0.03)
         self.declare_parameter('elbow_step', 0.03)
@@ -25,6 +25,12 @@ class ArmKeyboardTeleop(Node):
         self.declare_parameter('slider_limits', [-0.25, 0.0])
         self.declare_parameter('shoulder_limits', [-3.14159, 3.14159])
         self.declare_parameter('elbow_limits', [-3.14159, 3.14159])
+        self.declare_parameter('wrist_step', 0.05)
+        self.declare_parameter('claw_step', 0.02)
+        self.declare_parameter('wrist_vel', 2.4)
+        self.declare_parameter('claw_vel', 0.6)
+        self.declare_parameter('wrist_limits', [-3.14159, 3.14159])
+        self.declare_parameter('claw_limits', [0.0, 1.065])
         self.declare_parameter('publish_rate', 20.0)
 
         # Read parameters
@@ -35,6 +41,10 @@ class ArmKeyboardTeleop(Node):
         self.slider_limits = self.get_parameter('slider_limits').value
         self.shoulder_limits = self.get_parameter('shoulder_limits').value
         self.elbow_limits = self.get_parameter('elbow_limits').value
+        self.wrist_step = self.get_parameter('wrist_step').value
+        self.claw_step = self.get_parameter('claw_step').value
+        self.wrist_limits = self.get_parameter('wrist_limits').value
+        self.claw_limits = self.get_parameter('claw_limits').value
         publish_rate = self.get_parameter('publish_rate').value
 
         # Joint limits as list of [min, max] per joint
@@ -42,24 +52,29 @@ class ArmKeyboardTeleop(Node):
             self.slider_limits,
             self.shoulder_limits,
             self.elbow_limits,
+            self.wrist_limits,
+            self.claw_limits,
         ]
 
         # Step sizes per joint index (position mode)
-        self.steps = [self.slider_step, self.shoulder_step, self.elbow_step]
+        self.steps = [self.slider_step, self.shoulder_step, self.elbow_step,
+                      self.wrist_step, self.claw_step]
 
         # Velocity targets per joint index (velocity mode)
         self.vel_targets = [
             self.get_parameter('slider_vel').value,
             self.get_parameter('shoulder_vel').value,
             self.get_parameter('elbow_vel').value,
+            self.get_parameter('wrist_vel').value,
+            self.get_parameter('claw_vel').value,
         ]
 
         # Current desired positions (position mode)
-        self.positions = [0.0, 0.0, 0.0]
+        self.positions = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Active deltas (position mode) or velocity commands (velocity mode)
-        self.deltas = [0.0, 0.0, 0.0]
-        self.vel_commands = [0.0, 0.0, 0.0]
+        self.deltas = [0.0, 0.0, 0.0, 0.0, 0.0]
+        self.vel_commands = [0.0, 0.0, 0.0, 0.0, 0.0]
         self.lock = threading.Lock()
 
         # Control mode: 'position' or 'velocity'
@@ -79,6 +94,10 @@ class ArmKeyboardTeleop(Node):
             'd': (1, -1.0),  # shoulder right
             'j': (2, 1.0),   # elbow left
             'l': (2, -1.0),  # elbow right
+            'i': (3, 1.0),   # wrist CCW
+            'k': (3, -1.0),  # wrist CW
+            'o': (4, -1.0),  # claw open
+            'p': (4, 1.0),   # claw close
         }
 
         # Track running state
@@ -98,6 +117,8 @@ class ArmKeyboardTeleop(Node):
         print('  w/s : slider up/down')
         print('  a/d : shoulder left/right')
         print('  j/l : elbow left/right')
+        print('  i/k : wrist CCW/CW')
+        print('  o/p : claw open/close')
         print('  v   : toggle pos/vel mode')
         print('  0   : zero all joints')
         print('  q   : quit')
@@ -122,8 +143,8 @@ class ArmKeyboardTeleop(Node):
                 else:
                     # No key pressed, clear active commands
                     with self.lock:
-                        self.deltas = [0.0, 0.0, 0.0]
-                        self.vel_commands = [0.0, 0.0, 0.0]
+                        self.deltas = [0.0, 0.0, 0.0, 0.0, 0.0]
+                        self.vel_commands = [0.0, 0.0, 0.0, 0.0, 0.0]
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
@@ -139,17 +160,17 @@ class ArmKeyboardTeleop(Node):
                     self.mode = 'velocity'
                 else:
                     self.mode = 'position'
-                self.deltas = [0.0, 0.0, 0.0]
-                self.vel_commands = [0.0, 0.0, 0.0]
+                self.deltas = [0.0, 0.0, 0.0, 0.0, 0.0]
+                self.vel_commands = [0.0, 0.0, 0.0, 0.0, 0.0]
             sys.stdout.write(f'\r\nMode: {self.mode}\r\n')
             sys.stdout.flush()
             return
 
         if key == '0':
             with self.lock:
-                self.positions = [0.0, 0.0, 0.0]
-                self.deltas = [0.0, 0.0, 0.0]
-                self.vel_commands = [0.0, 0.0, 0.0]
+                self.positions = [0.0, 0.0, 0.0, 0.0, 0.0]
+                self.deltas = [0.0, 0.0, 0.0, 0.0, 0.0]
+                self.vel_commands = [0.0, 0.0, 0.0, 0.0, 0.0]
             sys.stdout.write('\r\nZeroed all joints\r\n')
             sys.stdout.flush()
             return
@@ -158,10 +179,10 @@ class ArmKeyboardTeleop(Node):
             joint_idx, direction = self.key_map[key]
             with self.lock:
                 if self.mode == 'position':
-                    self.deltas = [0.0, 0.0, 0.0]
+                    self.deltas = [0.0, 0.0, 0.0, 0.0, 0.0]
                     self.deltas[joint_idx] = direction * self.steps[joint_idx]
                 else:
-                    self.vel_commands = [0.0, 0.0, 0.0]
+                    self.vel_commands = [0.0, 0.0, 0.0, 0.0, 0.0]
                     self.vel_commands[joint_idx] = direction * self.vel_targets[joint_idx]
 
     def publish_command(self):
@@ -172,7 +193,7 @@ class ArmKeyboardTeleop(Node):
         with self.lock:
             if self.mode == 'position':
                 # Apply deltas and clamp
-                for i in range(3):
+                for i in range(5):
                     self.positions[i] += self.deltas[i]
                     self.positions[i] = max(self.limits[i][0],
                                             min(self.limits[i][1], self.positions[i]))

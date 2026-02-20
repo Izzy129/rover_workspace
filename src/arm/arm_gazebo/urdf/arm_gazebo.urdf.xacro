@@ -19,6 +19,8 @@
       - slider       (prismatic)
       - shoulder_1   (revolute)
       - elbow_1      (revolute)
+      - wrist        (revolute)
+      - claw         (revolute)
 
     Mimic joints (velocity derived from primary via multiplier):
       - shoulder_2     mirrors shoulder_1, multiplier: -1.0
@@ -54,6 +56,24 @@
       <command_interface name="velocity">
         <param name="min">-0.67</param>
         <param name="max">0.67</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wrist">
+      <command_interface name="velocity">
+        <param name="min">-1.0</param>
+        <param name="max">1.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="claw">
+      <command_interface name="velocity">
+        <param name="min">-0.5</param>
+        <param name="max">0.5</param>
       </command_interface>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -119,6 +139,12 @@
     <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="elbow_end_1">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="wrist">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="claw">
     <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
 

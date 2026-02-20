@@ -27,17 +27,21 @@ class GazeboBridge(Node):
         self.declare_parameter('slider_max_vel', 0.05)
         self.declare_parameter('shoulder_max_vel', 0.67)
         self.declare_parameter('elbow_max_vel', 0.67)
+        self.declare_parameter('wrist_max_vel', 1.0)
+        self.declare_parameter('claw_max_vel', 0.5)
 
         self.kp = self.get_parameter('position_kp').value
         self.max_vels = [
             self.get_parameter('slider_max_vel').value,
             self.get_parameter('shoulder_max_vel').value,
             self.get_parameter('elbow_max_vel').value,
+            self.get_parameter('wrist_max_vel').value,
+            self.get_parameter('claw_max_vel').value,
         ]
 
         # Joint order must match arm_controllers.yaml
-        self.joint_names = ['slider', 'shoulder_1', 'elbow_1']
-        self.current_positions = [0.0, 0.0, 0.0]
+        self.joint_names = ['slider', 'shoulder_1', 'elbow_1', 'wrist', 'claw']
+        self.current_positions = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         self.last_command: JointState | None = None
 
@@ -66,7 +70,7 @@ class GazeboBridge(Node):
         self.last_command = msg
 
     def publish_commands(self):
-        velocities = [0.0, 0.0, 0.0]
+        velocities = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         if self.last_command is not None:
             msg = self.last_command

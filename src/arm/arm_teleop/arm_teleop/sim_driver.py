@@ -30,32 +30,44 @@ class ArmSimDriver(Node):
         self.declare_parameter('slider_limits', [-0.25, 0.0])
         self.declare_parameter('shoulder_limits', [-3.14159, 3.14159])
         self.declare_parameter('elbow_limits', [-3.14159, 3.14159])
+        self.declare_parameter('wrist_max_vel', 1.0)
+        self.declare_parameter('wrist_max_accel', 2.0)
+        self.declare_parameter('claw_max_vel', 0.5)
+        self.declare_parameter('claw_max_accel', 1.0)
+        self.declare_parameter('wrist_limits', [-3.14159, 3.14159])
+        self.declare_parameter('claw_limits', [0.0, 1.065])
 
         self.max_vel = [
             self.get_parameter('slider_max_vel').value,
             self.get_parameter('shoulder_max_vel').value,
             self.get_parameter('elbow_max_vel').value,
+            self.get_parameter('wrist_max_vel').value,
+            self.get_parameter('claw_max_vel').value,
         ]
         self.max_accel = [
             self.get_parameter('slider_max_accel').value,
             self.get_parameter('shoulder_max_accel').value,
             self.get_parameter('elbow_max_accel').value,
+            self.get_parameter('wrist_max_accel').value,
+            self.get_parameter('claw_max_accel').value,
         ]
         self.limits = [
             self.get_parameter('slider_limits').value,
             self.get_parameter('shoulder_limits').value,
             self.get_parameter('elbow_limits').value,
+            self.get_parameter('wrist_limits').value,
+            self.get_parameter('claw_limits').value,
         ]
 
-        self.joint_names = ['slider', 'shoulder_1', 'elbow_1']
-        self.positions = [0.0, 0.0, 0.0]
-        self.velocities = [0.0, 0.0, 0.0]
+        self.joint_names = ['slider', 'shoulder_1', 'elbow_1', 'wrist', 'claw']
+        self.positions = [0.0, 0.0, 0.0, 0.0, 0.0]
+        self.velocities = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Position mode state
-        self.targets = [0.0, 0.0, 0.0]
+        self.targets = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Velocity mode state
-        self.desired_velocities = [0.0, 0.0, 0.0]
+        self.desired_velocities = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Control mode: 'position' or 'velocity'
         self.control_mode = 'position'

@@ -1,15 +1,21 @@
 arm_keyboard_teleop:
   ros__parameters:
-    joint_names: [slider, shoulder_1, elbow_1]
+    joint_names: [slider, shoulder_1, elbow_1, wrist, claw]
     slider_step: 0.005
     shoulder_step: 0.03
     elbow_step: 0.03
+    wrist_step: 0.05
+    claw_step: 0.02
     slider_limits: [-0.25, 0.0]
     shoulder_limits: [-3.14159, 3.14159]
     elbow_limits: [-3.14159, 3.14159]
+    wrist_limits: [-3.14159, 3.14159]
+    claw_limits: [0.0, 1.065]
     slider_vel: 0.04
     shoulder_vel: 0.53
     elbow_vel: 0.53
+    wrist_vel: 2.4
+    claw_vel: 0.6
     publish_rate: 20.0
 
 arm_sim_driver:
@@ -20,6 +26,12 @@ arm_sim_driver:
     shoulder_max_accel: 2.0
     elbow_max_vel: 0.67
     elbow_max_accel: 2.0
+    wrist_max_vel: 1.0
+    wrist_max_accel: 2.0
+    claw_max_vel: 0.5
+    claw_max_accel: 1.0
     slider_limits: [-0.25, 0.0]
     shoulder_limits: [-3.14159, 3.14159]
     elbow_limits: [-3.14159, 3.14159]
+    wrist_limits: [-3.14159, 3.14159]
+    claw_limits: [0.0, 1.065]

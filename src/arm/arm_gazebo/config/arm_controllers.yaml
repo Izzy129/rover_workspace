@@ -8,13 +8,15 @@ controller_manager:
     arm_vel_controller:
       type: forward_command_controller/ForwardCommandController
 
-# Velocity controller for the 3 active joints.
+# Velocity controller for the 5 active joints.
 # Publishes to: /arm_vel_controller/commands (std_msgs/Float64MultiArray)
-# Joint order: [slider, shoulder_1, elbow_1]
+# Joint order: [slider, shoulder_1, elbow_1, wrist, claw]
 arm_vel_controller:
   ros__parameters:
     joints:
       - slider
       - shoulder_1
       - elbow_1
+      - wrist
+      - claw
     interface_name: velocity
