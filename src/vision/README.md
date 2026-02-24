@@ -13,6 +13,13 @@ aruco_detection
     ↓ /aruco_markers
 keyboard_detector
     ↓ /keyboard_keys, /keyboard_center
+
+lidar_publisher
+    livox_ros_driver2 → /livox/lidar (PointCloud2)
+        ↓
+    pointcloud_to_laserscan → /lidar/scan (LaserScan)
+        ↓
+    Navigation system
 ```
 
 ## Packages
@@ -39,6 +46,14 @@ Computes keyboard and individual key poses from four corner ArUco markers.
 - **Subscribes:** `/aruco_markers`
 - **Publishes:** `/keyboard_center`, `/keyboard_keys`, `/keyboard_pose` (for RViz)
 - **Configuration:** `config/keys.yaml` defines keyboard layout
+
+### lidar_publisher
+Launch orchestration for the Livox MID-360 LiDAR with pointcloud-to-laserscan conversion.
+
+- **Launches:** `livox_ros_driver2_node`, `pointcloud_to_laserscan_node`
+- **Publishes:** `/livox/lidar` (PointCloud2), `/lidar/scan` (LaserScan)
+- **Configuration:** `config/MID360_config.json` (network), `config/laserscan_params.yaml` (scan params)
+- **Build script:** `build_livox_driver.sh` (builds the Livox driver with correct ROS2 cmake args)
 
 ### vision_bringup
 Subsystem-level launch orchestration that brings up the complete vision pipeline.
@@ -70,7 +85,12 @@ Subsystem-level launch orchestration that brings up the complete vision pipeline
    ros2 launch vision_bringup vision_bringup.launch.py
    ```
 
-4. **(Optional) Install RealSense SDK** if using RealSense cameras:
+4. **(Optional) Install Livox SDK 2** if using the Livox MID-360 LiDAR:
+   - Follow the [Livox SDK 2 installation instructions](https://github.com/Livox-SDK/Livox-SDK2#2-installation)
+   - Then build the Livox ROS2 driver: `./src/vision/lidar_publisher/build_livox_driver.sh`
+   - Install the laserscan converter: `sudo apt install ros-jazzy-pointcloud-to-laserscan`
+
+5. **(Optional) Install RealSense SDK** if using RealSense cameras:
    - See [Intel RealSense installation guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
 
 **Notes:**
@@ -106,6 +126,9 @@ ros2 launch aruco_detection aruco_detection.launch.py use_rviz:=false
 
 # Keyboard detection only (requires camera and ArUco running in separate terminals)
 ros2 launch keyboard_detector keyboard_detector.launch.py
+
+# LiDAR (Livox MID-360 → LaserScan)
+ros2 launch lidar_publisher lidar_publisher.launch.py
 ```
 
 ## Published Topics
@@ -124,6 +147,8 @@ ros2 launch keyboard_detector keyboard_detector.launch.py
 | `/keyboard_center` | geometry_msgs/PoseStamped | Keyboard center pose (used for debugging) |
 | `/keyboard_keys` | vision_interfaces/KeyboardKeys | Individual key poses and labels |
 | `/keyboard_pose` | geometry_msgs/PoseArray | Key poses for RViz |
+| `/livox/lidar` | sensor_msgs/PointCloud2 | Livox MID-360 3D point cloud (10 Hz) |
+| `/lidar/scan` | sensor_msgs/LaserScan | 2D laser scan from point cloud (10 Hz) |
 | `/tf_static` | tf2_msgs/TFMessage | Static transforms (map → camera_link) |
 
 ## Build
@@ -204,6 +229,13 @@ src/vision/
 │   ├── config/                 # Keyboard layout
 │   ├── launch/                 # Launch files
 │   └── README.md
+├── lidar_publisher/
+│   ├── config/                 # MID360 network config, laserscan params
+│   ├── launch/                 # Launch files
+│   ├── build_livox_driver.sh   # Livox driver build script
+│   └── README.md
+├── livox_ros_driver2/          # Git submodule (Livox driver)
+├── Livox-SDK2/                 # Git submodule (Livox SDK, install systemwide)
 ├── vision_bringup/
 │   ├── launch/                 # Subsystem launch
 │   └── README.md
