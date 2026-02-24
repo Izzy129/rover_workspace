@@ -122,16 +122,19 @@ def generate_launch_description():
         )
     )
 
-    # Keyboard teleop — publishes to /diff_drive_controller/cmd_vel
+    # Keyboard teleop — publishes TwistStamped to /diff_drive_controller/cmd_vel
+    # Jazzy's diff_drive_controller requires TwistStamped (stamped:=true is mandatory).
     # Disabled by default: run in a separate terminal with use_teleop:=true,
-    # or manually: ros2 run teleop_twist_keyboard teleop_twist_keyboard
-    #              --ros-args -r /cmd_vel:=/diff_drive_controller/cmd_vel
+    # or manually:
+    #   ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+    #     --ros-args -p stamped:=true -r /cmd_vel:=/diff_drive_controller/cmd_vel
     teleop = TimerAction(
         period=6.0,
         actions=[Node(
             package='teleop_twist_keyboard',
             executable='teleop_twist_keyboard',
             name='teleop_twist_keyboard',
+            parameters=[{'stamped': True}],
             remappings=[('/cmd_vel', '/diff_drive_controller/cmd_vel')],
             output='screen',
             condition=IfCondition(LaunchConfiguration('use_teleop')),

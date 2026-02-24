@@ -24,13 +24,13 @@ controller_manager:
 # Measure actual wheel_radius and wheel_separation from the CAD / URDF geometry.
 diff_drive_controller:
   ros__parameters:
-    left_wheel_names:  [wheel_1, wheel_2, wheel_3]
-    right_wheel_names: [wheel_4, wheel_5, wheel_6]
+    left_wheel_names:  [jwheel_l1, jwheel_l2, jwheel_l3]
+    right_wheel_names: [jwheel_r1, jwheel_r2, jwheel_r3]
 
     wheel_separation: 0.43   # meters (approximate — update after measuring CAD)
     wheel_radius:     0.10   # meters (approximate — update after measuring CAD)
 
-    base_frame_id: front_plate
+    base_frame_id: box_assembly
     odom_frame_id: odom
 
     publish_rate: 50.0

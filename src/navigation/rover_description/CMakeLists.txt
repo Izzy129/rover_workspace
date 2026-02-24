@@ -11,7 +11,11 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-install(DIRECTORY urdf assets
+# Source of truth: urdf_models/rigid_body (relative to this package's source dir)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../urdf_models/rigid_body/robot.urdf
+  DESTINATION share/${PROJECT_NAME}/urdf/
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../urdf_models/rigid_body/assets
   DESTINATION share/${PROJECT_NAME}/
 )
 

@@ -24,7 +24,7 @@
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
 
-    <joint name="wheel_1">
+    <joint name="jwheel_l1">
       <command_interface name="velocity">
         <param name="min">-10</param>
         <param name="max">10</param>
@@ -33,7 +33,7 @@
       <state_interface name="velocity"/>
     </joint>
 
-    <joint name="wheel_2">
+    <joint name="jwheel_l2">
       <command_interface name="velocity">
         <param name="min">-10</param>
         <param name="max">10</param>
@@ -42,7 +42,7 @@
       <state_interface name="velocity"/>
     </joint>
 
-    <joint name="wheel_3">
+    <joint name="jwheel_l3">
       <command_interface name="velocity">
         <param name="min">-10</param>
         <param name="max">10</param>
@@ -51,7 +51,7 @@
       <state_interface name="velocity"/>
     </joint>
 
-    <joint name="wheel_4">
+    <joint name="jwheel_r3">
       <command_interface name="velocity">
         <param name="min">-10</param>
         <param name="max">10</param>
@@ -60,7 +60,7 @@
       <state_interface name="velocity"/>
     </joint>
 
-    <joint name="wheel_5">
+    <joint name="jwheel_r2">
       <command_interface name="velocity">
         <param name="min">-10</param>
         <param name="max">10</param>
@@ -69,7 +69,7 @@
       <state_interface name="velocity"/>
     </joint>
 
-    <joint name="wheel_6">
+    <joint name="jwheel_r1">
       <command_interface name="velocity">
         <param name="min">-10</param>
         <param name="max">10</param>
