@@ -25,7 +25,7 @@ import numpy as np
 CAMERA_CONFIGS = [
     {'name': 'left', 'device_index': 2, 'frame_id': 'left_camera_link'},
     {'name': 'front', 'device_index': 0, 'frame_id': 'front_camera_link'},
-    {'name': 'right', 'device_index': 7, 'frame_id': 'right_camera_link'},
+    {'name': 'right', 'device_index': 6, 'frame_id': 'right_camera_link'},
 ]
 PUBLISH_RATE = 30.0  # Hz
 

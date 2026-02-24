@@ -1,0 +1,12 @@
+pointcloud_to_laserscan_node:
+  ros__parameters:
+    min_height: -0.1        # TODO: ask rocky to tune this
+    max_height: 0.1         # TODO: ask rocky to tune this
+    angle_min: -3.14159     # full 360° for MID-360
+    angle_max: 3.14159
+    angle_increment: 0.0087 # around 1 degree resolution
+    scan_time: 0.1          # 10 Hz (matches publish_freq)
+    range_min: 0.1          # MID-360 min range
+    range_max: 40.0         # MID-360 max range
+    inf_is_valid: false
+    target_frame: 'livox_frame'

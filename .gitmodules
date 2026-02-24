@@ -1,0 +1,6 @@
+[submodule "src/vision/livox_ros_driver2"]
+	path = src/vision/livox_ros_driver2
+	url = https://github.com/Livox-SDK/livox_ros_driver2.git
+[submodule "src/vision/Livox-SDK2"]
+	path = src/vision/Livox-SDK2
+	url = https://github.com/Livox-SDK/Livox-SDK2.git
