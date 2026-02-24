@@ -983,7 +983,7 @@
     <origin xyz="0.175762 -0.154667 -0.0170868" rpy="2.61297e-16 -3.92524e-17 0.702372"/>
     <parent link="part1"/>
     <child link="part_1_5"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 0 -1"/>
     <limit effort="10" velocity="10"/>
   </joint>
   <!-- Link part_1_6 -->
@@ -1031,7 +1031,7 @@
     <origin xyz="-0.187242 -0.135406 -0.0170868" rpy="2.45551e-16 -1.76174e-16 -0.868424"/>
     <parent link="part1"/>
     <child link="part_1_6"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 0 -1"/>
     <limit effort="10" velocity="10"/>
   </joint>
   <!-- Joint from part_9 to part1 -->
@@ -1087,7 +1087,7 @@
     <origin xyz="0.285421 0.261127 -0.0270556" rpy="-1.14868e-17 1.33339e-16 2.44389"/>
     <parent link="part_9"/>
     <child link="part_1_7"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 0 -1"/>
     <limit effort="10" velocity="10"/>
   </joint>
   <!-- Joint from front_plate to part_9 -->

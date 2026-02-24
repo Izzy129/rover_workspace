@@ -1,0 +1,49 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz
+    switch_timeout: 15.0  # seconds (default 5s can time out for free-floating mobile robots)
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+# Differential drive controller for 6-wheeled rover.
+#
+# Wheel assignment (initial guess from URDF kinematic chains):
+#   main_l (left rocker)  → wheel_1
+#   sub_l chain           → wheel_2, wheel_3
+#   sub2_r bogie          → wheel_4, wheel_5
+#   main_r (right rocker) → wheel_6
+#
+# If the rover steers wrong after first launch:
+#   - Drives backward when pressing forward: swap left_wheel_names and right_wheel_names
+#   - Spins in place instead of going straight: adjust wheel_separation
+#
+# Measure actual wheel_radius and wheel_separation from the CAD / URDF geometry.
+diff_drive_controller:
+  ros__parameters:
+    left_wheel_names:  [wheel_1, wheel_2, wheel_3]
+    right_wheel_names: [wheel_4, wheel_5, wheel_6]
+
+    wheel_separation: 0.43   # meters (approximate — update after measuring CAD)
+    wheel_radius:     0.10   # meters (approximate — update after measuring CAD)
+
+    base_frame_id: front_plate
+    odom_frame_id: odom
+
+    publish_rate: 50.0
+    # Jazzy diff_drive_controller only accepts TwistStamped (use_stamped_vel was removed)
+
+    # Velocity limits
+    linear:
+      x:
+        has_velocity_limits: true
+        max_velocity: 1.0
+        min_velocity: -1.0
+    angular:
+      z:
+        has_velocity_limits: true
+        max_velocity: 2.0
+        min_velocity: -2.0
