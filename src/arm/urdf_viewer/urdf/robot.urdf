@@ -5,9 +5,14 @@
   <!-- Link part_1__length_0_5_meter -->
   <link name="part_1__length_0_5_meter">
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="1e-09"/>
-      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+      <!-- World-fixed base: 0.5 m linear rail + carriage + motor mount, ~1.5 kg total.
+           CoM estimated at mid-rail. Inertia for a 0.5 m x 0.05 m x 0.08 m box at 1.5 kg:
+             Ixx = 1.5/12*(0.5²+0.08²) = 0.03205
+             Iyy = 1.5/12*(0.05²+0.08²) = 0.00111
+             Izz = 1.5/12*(0.05²+0.5²)  = 0.03156 -->
+      <origin xyz="0.015 0.0 0.03" rpy="0 0 0"/>
+      <mass value="1.5"/>
+      <inertia ixx="0.03205" ixy="0" ixz="0" iyy="0.00111" iyz="0" izz="0.03156"/>
     </inertial>
     <!-- Part part_1__length_0_5_meter -->
     <visual>
@@ -236,7 +241,7 @@
     <parent link="6inch_shorter_arm_body_2"/>
     <child link="20inch_longer_arm_body_2"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="30" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
     <mimic joint="elbow_1" multiplier="1.0"/>
   </joint>
   <!-- Link 20inch_longer_arm_body_3 -->
@@ -337,8 +342,9 @@
   <link name="part_1">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="1e-09"/>
-      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+      <mass value="0.05"/>
+      <!-- Approx inertia for a 4x3x1 cm gripper jaw, 0.05 kg -->
+      <inertia ixx="4.2e-6" ixy="0" ixz="0" iyy="7.1e-6" iyz="0" izz="1.04e-5"/>
     </inertial>
     <!-- Part part_1_2 -->
     <visual>
@@ -393,8 +399,9 @@
   <link name="part_1_2">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="1e-09"/>
-      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+      <mass value="0.05"/>
+      <!-- Approx inertia for a 4x3x1 cm gripper jaw, 0.05 kg -->
+      <inertia ixx="4.2e-6" ixy="0" ixz="0" iyy="7.1e-6" iyz="0" izz="1.04e-5"/>
     </inertial>
     <!-- Part part_1_5 -->
     <visual>
@@ -435,7 +442,7 @@
     <parent link="part_1"/>
     <child link="part_1_2"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-0.785398" upper="0.279253"/>
+    <limit effort="20" velocity="10" lower="-0.785398" upper="0.279253"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body_3 to part_1 -->
   <joint name="wrist" type="revolute">
@@ -443,7 +450,7 @@
     <parent link="6inch_shorter_arm_body_3"/>
     <child link="part_1"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="20" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
   </joint>
   <!-- Joint from 20inch_longer_arm_body_3 to 6inch_shorter_arm_body_3 -->
   <joint name="elbow_end_1" type="revolute">
@@ -451,7 +458,7 @@
     <parent link="20inch_longer_arm_body_3"/>
     <child link="6inch_shorter_arm_body_3"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="30" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
     <mimic joint="elbow_1" multiplier="1.0"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body_2 to 20inch_longer_arm_body_3 -->
@@ -460,7 +467,7 @@
     <parent link="6inch_shorter_arm_body_2"/>
     <child link="20inch_longer_arm_body_3"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="30" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
   </joint>
   <!-- Joint from 20inch_longer_arm_body to 6inch_shorter_arm_body_2 -->
   <joint name="shoulder_end_1" type="revolute">
@@ -468,7 +475,7 @@
     <parent link="20inch_longer_arm_body"/>
     <child link="6inch_shorter_arm_body_2"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="50" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
     <mimic joint="shoulder_1" multiplier="1.0"/>
   </joint>
   <!-- Joint from 6inch_shorter_arm_body to 20inch_longer_arm_body -->
@@ -477,7 +484,7 @@
     <parent link="6inch_shorter_arm_body"/>
     <child link="20inch_longer_arm_body"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="50" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
   </joint>
   <!-- Link 20inch_longer_arm_body_4 -->
   <link name="20inch_longer_arm_body_4">
@@ -539,7 +546,7 @@
     <parent link="6inch_shorter_arm_body"/>
     <child link="20inch_longer_arm_body_4"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+    <limit effort="50" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
     <mimic joint="shoulder_1" multiplier="-1.0"/>
   </joint>
   <!-- Joint from part_1__length_0_5_meter to 6inch_shorter_arm_body -->
@@ -548,6 +555,6 @@
     <parent link="part_1__length_0_5_meter"/>
     <child link="6inch_shorter_arm_body"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" velocity="10" lower="-0.205617" upper="0.0443825"/>
+    <limit effort="50" velocity="10" lower="-0.205617" upper="0.0443825"/>
   </joint>
 </robot>

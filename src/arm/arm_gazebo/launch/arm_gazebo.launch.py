@@ -67,6 +67,84 @@ def generate_launch_description():
         launch_arguments={'gz_args': '-r empty.sdf'}.items(),
     )
 
+    # Toolbox model: cube base + two rectangular posts + horizontal cylinder handle
+    # Inertia computed for base box (0.14x0.10x0.08, 2 kg) — dominant mass contributor:
+    #   Ixx = m/12*(y²+z²) = 2/12*(0.01+0.0064)  = 0.002733
+    #   Iyy = m/12*(x²+z²) = 2/12*(0.0196+0.0064) = 0.004333
+    #   Izz = m/12*(x²+y²) = 2/12*(0.0196+0.01)   = 0.004933
+    # Surface params on every collision: high friction (mu=1.0) + contact stiffness/damping
+    # prevent the object phasing through the gripper.
+    _surface = """<surface>
+          <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+          <contact><ode><kp>1e6</kp><kd>100</kd><max_vel>0.1</max_vel><min_depth>0.001</min_depth></ode></contact>
+        </surface>"""
+    toolbox_sdf = f"""<sdf version='1.7'>
+  <model name='toolbox'>
+    <static>false</static>
+    <link name='body'>
+      <inertial>
+        <mass>2.0</mass>
+        <inertia>
+          <ixx>0.002733</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.004333</iyy><iyz>0</iyz>
+          <izz>0.004933</izz>
+        </inertia>
+      </inertial>
+      <collision name='base_col'>
+        <pose>0 0 0.04 0 0 0</pose>
+        <geometry><box><size>0.14 0.10 0.08</size></box></geometry>
+        {_surface}
+      </collision>
+      <visual name='base_vis'>
+        <pose>0 0 0.04 0 0 0</pose>
+        <geometry><box><size>0.14 0.10 0.08</size></box></geometry>
+        <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
+      </visual>
+      <collision name='left_post_col'>
+        <pose>0 -0.04 0.12 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.08</size></box></geometry>
+        {_surface}
+      </collision>
+      <visual name='left_post_vis'>
+        <pose>0 -0.04 0.12 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.08</size></box></geometry>
+        <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
+      </visual>
+      <collision name='right_post_col'>
+        <pose>0 0.04 0.12 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.08</size></box></geometry>
+        {_surface}
+      </collision>
+      <visual name='right_post_vis'>
+        <pose>0 0.04 0.12 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.08</size></box></geometry>
+        <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
+      </visual>
+      <collision name='handle_col'>
+        <pose>0 0 0.16 1.5708 0 0</pose>
+        <geometry><cylinder><radius>0.015</radius><length>0.10</length></cylinder></geometry>
+        {_surface}
+      </collision>
+      <visual name='handle_vis'>
+        <pose>0 0 0.16 1.5708 0 0</pose>
+        <geometry><cylinder><radius>0.015</radius><length>0.10</length></cylinder></geometry>
+        <material><ambient>0.6 0.4 0.2 1</ambient><diffuse>0.6 0.4 0.2 1</diffuse></material>
+      </visual>
+    </link>
+  </model>
+</sdf>"""
+
+    spawn_toolbox = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-name', 'toolbox',
+            '-x', '0.6', '-y', '0.0', '-z', '0.05',
+            '-string', toolbox_sdf,
+        ],
+        output='screen',
+    )
+
     # Spawn the robot into Gazebo from the /robot_description topic
     spawn_robot = Node(
         package='ros_gz_sim',
@@ -149,6 +227,7 @@ def generate_launch_description():
         robot_state_publisher,
         gazebo,
         spawn_robot,
+        spawn_toolbox,
         clock_bridge,
         joint_state_broadcaster_spawner,
         start_arm_vel_controller,

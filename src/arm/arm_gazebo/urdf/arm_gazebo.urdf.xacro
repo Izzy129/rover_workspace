@@ -148,4 +148,22 @@
     <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
 
+  <!-- High friction + contact stiffness on claw fingers so objects don't phase through -->
+  <gazebo reference="part_1">
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+    <kp>1e6</kp>
+    <kd>100</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+  </gazebo>
+  <gazebo reference="part_1_2">
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+    <kp>1e6</kp>
+    <kd>100</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+  </gazebo>
+
 </robot>
