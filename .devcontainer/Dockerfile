@@ -35,3 +35,6 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/$USERNAME/.bashrc
 # Install proper OpenCV version for Aruco API
 RUN pip install --break-system-packages "opencv-contrib-python>=4.8.0"
 
+# Install Ultralytics (YOLO) for object detection
+RUN pip install --break-system-packages ultralytics
+
