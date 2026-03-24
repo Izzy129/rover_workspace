@@ -1,18 +1,21 @@
 # Vision Subsystem
 
-This folder houses the vision pipeline for the rover providing camera capture, ArUco marker detection, and keyboard pose estimation for the University Rover Challenge (URC).
-
-**TODO: Object detection subsystem** 
+This folder houses the vision pipeline for the rover providing camera capture, ArUco marker detection, keyboard pose estimation, and YOLO object detection for the University Rover Challenge (URC).
 
 ## ROS Architecture
 
 ```
 camera_publisher
-    ↓ /image_raw, /camera_info
+    ↓ /camera_{left,front,right}/image_raw, /camera_info
 aruco_detection
     ↓ /aruco_markers
 keyboard_detector
     ↓ /keyboard_keys, /keyboard_center
+
+camera_publisher
+    ↓ /camera_{left,front,right}/image_raw
+object_detection
+    ↓ /camera_{left,front,right}/object_detection/image_raw
 
 lidar_publisher
     livox_ros_driver2 → /livox/lidar (PointCloud2)
@@ -46,6 +49,13 @@ Computes keyboard and individual key poses from four corner ArUco markers.
 - **Subscribes:** `/aruco_markers`
 - **Publishes:** `/keyboard_center`, `/keyboard_keys`, `/keyboard_pose` (for RViz)
 - **Configuration:** `config/keys.yaml` defines keyboard layout
+
+### object_detection
+YOLO-based object detection across the left, front, and right cameras.
+
+- **Executables:** `detector`
+- **Subscribes:** `/camera_{left,front,right}/image_raw`
+- **Publishes:** `/camera_{left,front,right}/object_detection/image_raw` (annotated images with bounding boxes)
 
 ### lidar_publisher
 Launch orchestration for the Livox MID-360 LiDAR with pointcloud-to-laserscan conversion.
@@ -96,6 +106,8 @@ Subsystem-level launch orchestration that brings up the complete vision pipeline
 **Notes:**
 - We follow standard ROS2 practices - all Python dependencies are managed via rosdep/apt, not pip/venv
 - **Exception:** OpenCV 4.8+ is required for ArUco detection. If `python3-opencv` from apt is too old, use: `pip install opencv-contrib-python>=4.8.0`
+- **Exception:** `ultralytics` is not on apt — install via: `pip install ultralytics --break-system-packages`
+- `ros2_numpy` is vendored as a git submodule at `src/vision/ros2_numpy`. After cloning the repo, run: `git submodule update --init --recursive`
 
 ## Quick Start
 
@@ -131,6 +143,8 @@ ros2 launch keyboard_detector keyboard_detector.launch.py
 ros2 launch lidar_publisher lidar_publisher.launch.py
 ```
 
+TODO: add YOLO detection to subsystem launch?
+
 ## Published Topics
 
 | Topic | Type | Description |
@@ -147,6 +161,9 @@ ros2 launch lidar_publisher lidar_publisher.launch.py
 | `/keyboard_center` | geometry_msgs/PoseStamped | Keyboard center pose (used for debugging) |
 | `/keyboard_keys` | vision_interfaces/KeyboardKeys | Individual key poses and labels |
 | `/keyboard_pose` | geometry_msgs/PoseArray | Key poses for RViz |
+| `/camera_left/object_detection/image_raw` | sensor_msgs/Image | Left camera with YOLO bounding boxes |
+| `/camera_front/object_detection/image_raw` | sensor_msgs/Image | Front camera with YOLO bounding boxes |
+| `/camera_right/object_detection/image_raw` | sensor_msgs/Image | Right camera with YOLO bounding boxes |
 | `/livox/lidar` | sensor_msgs/PointCloud2 | Livox MID-360 3D point cloud (10 Hz) |
 | `/lidar/scan` | sensor_msgs/LaserScan | 2D laser scan from point cloud (10 Hz) |
 | `/tf_static` | tf2_msgs/TFMessage | Static transforms (map → camera_link) |
@@ -161,6 +178,7 @@ colcon build --packages-up-to vision_bringup
 colcon build --packages-select camera_publisher
 colcon build --packages-select aruco_detection
 colcon build --packages-select keyboard_detector
+colcon build --packages-select object_detection
 ```
 
 ## Configuration
@@ -200,6 +218,7 @@ Launch with `visualize_keyboard:=true` to see:
 ros2 pkg executables camera_publisher
 ros2 pkg executables aruco_detection
 ros2 pkg executables keyboard_detector
+ros2 pkg executables object_detection
 
 # Check topic flow
 ros2 topic list
@@ -234,6 +253,10 @@ src/vision/
 │   ├── launch/                 # Launch files
 │   ├── build_livox_driver.sh   # Livox driver build script
 │   └── README.md
+├── object_detection/
+│   ├── object_detection/       # Python package
+│   └── README.md
+├── ros2_numpy/                 # Git submodule (ROS2 numpy bridge)
 ├── livox_ros_driver2/          # Git submodule (Livox driver)
 ├── Livox-SDK2/                 # Git submodule (Livox SDK, install systemwide)
 ├── vision_bringup/
