@@ -40,6 +40,6 @@
     "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
     "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
   ],
-  "postCreateCommand": "bash -c 'cd \"$WORKSPACE_FOLDER\" && mkdir -p src && (if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi) && rosdep update && rosdep install --from-paths src --ignore-src -r -y && source /opt/ros/humble/setup.bash && colcon build && sudo chown -R $(id -u):$(id -g) .'"
+  "postCreateCommand": "bash -c 'cd \"$WORKSPACE_FOLDER\" && git submodule update --init --recursive && mkdir -p src && (if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi) && rosdep update && rosdep install --from-paths src --ignore-src -r -y && source /opt/ros/jazzy/setup.bash && colcon build && sudo chown -R $(id -u):$(id -g) .'"
 }
 
