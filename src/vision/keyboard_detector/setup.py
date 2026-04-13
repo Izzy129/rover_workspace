@@ -21,7 +21,6 @@ setup(
     maintainer_email='riceroboticsclub@gmail.com',
     description='Keyboard pose estimation from ArUco markers for URC',
     license='TODO: License declaration',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'keyboard_detection = keyboard_detector.keyboard_detection:main',

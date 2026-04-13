@@ -20,7 +20,6 @@ setup(
     maintainer_email='riceroboticsclub@gmail.com',
     description='Vision subsystem launch orchestration',
     license='TODO: License declaration',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
         ],

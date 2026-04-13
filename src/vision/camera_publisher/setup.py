@@ -21,7 +21,6 @@ setup(
     maintainer_email='riceroboticsclub@gmail.com',
     description='Camera abstraction layer for USB cameras and RealSense cameras',
     license='TODO: License declaration',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'camera_publisher = camera_publisher.usb_camera_publisher:main',

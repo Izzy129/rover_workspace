@@ -18,7 +18,6 @@ setup(
     maintainer_email='riceroboticsclub@gmail.com',
     description='Object detection',
     license='TODO',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'detector = object_detection.detector:main',

@@ -22,7 +22,6 @@ setup(
     maintainer_email='riceroboticsclub@gmail.com',
     description='Launch orchestration for Livox MID-360 LiDAR with pointcloud to laserscan conversion',
     license='TODO: License declaration',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [],
     },
