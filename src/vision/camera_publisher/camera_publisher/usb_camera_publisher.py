@@ -18,9 +18,12 @@ import threading
 
 import cv2
 import rclpy
+import yaml
+from ament_index_python.packages import get_package_share_directory
 from cv_bridge import CvBridge
 from rclpy.node import Node
 from sensor_msgs.msg import CameraInfo, Image
+from sensor_msgs.srv import SetCameraInfo
 
 # Camera configuration
 CAMERA_CONFIGS = [
@@ -29,6 +32,10 @@ CAMERA_CONFIGS = [
     {'name': 'right', 'device_index': 6, 'frame_id': 'right_camera_link'},
 ]
 PUBLISH_RATE = 30.0  # Hz
+
+# All 3 cameras are the same model so they share one calibration file
+_share = get_package_share_directory('camera_publisher')
+CALIBRATION_YAML = f'{_share}/config/calibration/ardu_camera.yaml'
 
 
 class UsbCameraPublisher(Node):
@@ -68,18 +75,8 @@ class UsbCameraPublisher(Node):
             self.image_pubs[name] = self.create_publisher(Image, f'/camera_{name}/image_raw', 10)
             self.info_pubs[name] = self.create_publisher(CameraInfo, f'/camera_{name}/camera_info', 10)
 
-            # Set camera info (basic defaults for USB camera)
-            camera_info = CameraInfo()
-            camera_info.header.frame_id = frame_id
-            camera_info.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            camera_info.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            camera_info.distortion_model = 'plumb_bob'
-            fx = fy = min(camera_info.width, camera_info.height) * 0.8
-            cx = camera_info.width / 2.0
-            cy = camera_info.height / 2.0
-            camera_info.k = [fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0]
-            camera_info.d = [0.0, 0.0, 0.0, 0.0, 0.0]  # No distortion
-
+            # Load camera info from calibration YAML
+            camera_info = self._load_camera_info(CALIBRATION_YAML, frame_id)
             self.camera_infos[name] = camera_info
 
             # Frame buffer and lock for this camera
@@ -96,6 +93,20 @@ class UsbCameraPublisher(Node):
         self.timer = self.create_timer(1.0 / PUBLISH_RATE, self.timer_callback)
 
         self.get_logger().info(f'Camera publisher started with {len(self.cameras)} cameras at {PUBLISH_RATE} Hz')
+
+    def _load_camera_info(self, yaml_path, frame_id):
+        with open(yaml_path, 'r') as f:
+            data = yaml.safe_load(f)
+        info = CameraInfo()
+        info.header.frame_id = frame_id
+        info.width = data['image_width']
+        info.height = data['image_height']
+        info.distortion_model = data['distortion_model']
+        info.k = data['camera_matrix']['data']
+        info.d = data['distortion_coefficients']['data']
+        info.r = data['rectification_matrix']['data']
+        info.p = data['projection_matrix']['data']
+        return info
 
     def _capture_loop(self, name):
         """Continuously reads frames from the camera into a buffer."""

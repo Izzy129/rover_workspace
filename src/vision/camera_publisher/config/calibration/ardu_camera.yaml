@@ -1,0 +1,26 @@
+image_width: 640
+image_height: 480
+camera_name: ardu_camera
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [343.22969,   0.     , 327.72536,
+           0.     , 343.599  , 250.60935,
+           0.     ,   0.     ,   1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.275378, 0.057227, 0.000587, -0.000443, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [238.5621 ,   0.     , 327.52655,   0.     ,
+           0.     , 285.80469, 255.76115,   0.     ,
+           0.     ,   0.     ,   1.     ,   0.     ]
