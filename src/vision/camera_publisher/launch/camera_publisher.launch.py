@@ -73,6 +73,38 @@ def generate_launch_description():
         )
     )
 
+    # undistort each camera using calibration data from camera_info
+    rectify_left = Node(
+        package='image_proc',
+        executable='rectify_node',
+        name='rectify_left',
+        remappings=[
+            ('image', '/camera_left/image_raw'),
+            ('camera_info', '/camera_left/camera_info'),
+            ('image_rect', '/camera_left/image_rect_color'),
+        ]
+    )
+    rectify_front = Node(
+        package='image_proc',
+        executable='rectify_node',
+        name='rectify_front',
+        remappings=[
+            ('image', '/camera_front/image_raw'),
+            ('camera_info', '/camera_front/camera_info'),
+            ('image_rect', '/camera_front/image_rect_color'),
+        ]
+    )
+    rectify_right = Node(
+        package='image_proc',
+        executable='rectify_node',
+        name='rectify_right',
+        remappings=[
+            ('image', '/camera_right/image_raw'),
+            ('camera_info', '/camera_right/camera_info'),
+            ('image_rect', '/camera_right/image_rect_color'),
+        ]
+    )
+
     return LaunchDescription([
         camera_type_arg,
         stream_type_arg,
@@ -81,4 +113,7 @@ def generate_launch_description():
         static_tf_right,
         camera_node,
         realsense_node,
+        rectify_left,
+        rectify_front,
+        rectify_right,
     ])
