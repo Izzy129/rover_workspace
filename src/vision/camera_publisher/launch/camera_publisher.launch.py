@@ -24,12 +24,30 @@ def generate_launch_description():
     camera_type = LaunchConfiguration('camera_type')
     stream_type = LaunchConfiguration('stream_type')
 
-    # Static transform: map -> camera_link
-    static_tf_node = Node(
+    # Static transforms: map -> <camera>_camera_link    
+    # currently parent_frame is map, because idk what the rover's base_link frame is called
+    # TODO: update the parent frame once rover URDF isn't cooked
+    static_tf_left = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
-        name='camera_static_tf',
-        arguments=['0', '0', '0', '0', '0', '0', 'map', 'camera_link']
+        name='left_camera_tf',
+        arguments=['0.0', '0.1', '0.5', '0', '-1.57', '0', 'map', 'left_camera_link']
+            #        x      y      z    yaw  pitch roll parent_frame child_frame (meters, radians)
+
+    )
+    static_tf_front = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='front_camera_tf',
+        arguments=['0.2', '0.0', '0.5', '0', '0', '0', 'map', 'front_camera_link']
+            #        x      y      z    yaw  pitch roll parent_frame child_frame (meters, radians)
+    )
+    static_tf_right = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='right_camera_tf',
+        arguments=['0.0', '-0.1', '0.5', '0', '1.57', '0', 'map', 'right_camera_link']
+            #        x      y      z    yaw  pitch roll parent_frame child_frame (meters, radians)
     )
 
     # Camera publisher node
@@ -58,7 +76,9 @@ def generate_launch_description():
     return LaunchDescription([
         camera_type_arg,
         stream_type_arg,
-        static_tf_node,
+        static_tf_left,
+        static_tf_front,
+        static_tf_right,
         camera_node,
         realsense_node,
     ])

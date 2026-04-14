@@ -14,12 +14,13 @@ Published Topics:
     /camera_right/camera_info (sensor_msgs.msg.CameraInfo)
 """
 
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import Image, CameraInfo
-from cv_bridge import CvBridge
+import threading
+
 import cv2
-import numpy as np
+import rclpy
+from cv_bridge import CvBridge
+from rclpy.node import Node
+from sensor_msgs.msg import CameraInfo, Image
 
 # Camera configuration
 CAMERA_CONFIGS = [
@@ -43,6 +44,10 @@ class UsbCameraPublisher(Node):
         self.info_pubs = {}
         self.camera_infos = {}
 
+        # Latest frames from capture threads
+        self.frames = {}
+        self.frame_locks = {}
+
         # Initialize all cameras
         for config in CAMERA_CONFIGS:
             name = config['name']
@@ -55,7 +60,6 @@ class UsbCameraPublisher(Node):
             cap = cv2.VideoCapture(device_index)
             if not cap.isOpened():
                 self.get_logger().error(f'Cannot open {name} camera at device {device_index}')
-                # Fail entire node if any camera fails to open
                 raise RuntimeError(f'Failed to open {name} camera at device {device_index}')
 
             self.cameras[name] = cap
@@ -69,9 +73,7 @@ class UsbCameraPublisher(Node):
             camera_info.header.frame_id = frame_id
             camera_info.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             camera_info.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            # Simple pinhole model
             camera_info.distortion_model = 'plumb_bob'
-            # Focal length approximation (adjust as needed)
             fx = fy = min(camera_info.width, camera_info.height) * 0.8
             cx = camera_info.width / 2.0
             cy = camera_info.height / 2.0
@@ -79,22 +81,41 @@ class UsbCameraPublisher(Node):
             camera_info.d = [0.0, 0.0, 0.0, 0.0, 0.0]  # No distortion
 
             self.camera_infos[name] = camera_info
+
+            # Frame buffer and lock for this camera
+            self.frames[name] = None
+            self.frame_locks[name] = threading.Lock()
+
+            # Dedicated capture thread so cap.read() never blocks the ROS executor
+            t = threading.Thread(target=self._capture_loop, args=(name,), daemon=True)
+            t.start()
+
             self.get_logger().info(f"{name} camera initialized successfully")
 
         # Timer to publish at configured rate
-        self.timer = self.create_timer(1.0/PUBLISH_RATE, self.timer_callback)
+        self.timer = self.create_timer(1.0 / PUBLISH_RATE, self.timer_callback)
 
         self.get_logger().info(f'Camera publisher started with {len(self.cameras)} cameras at {PUBLISH_RATE} Hz')
 
+    def _capture_loop(self, name):
+        """Continuously reads frames from the camera into a buffer."""
+        cap = self.cameras[name]
+        while rclpy.ok():
+            ret, frame = cap.read()
+            if ret:
+                with self.frame_locks[name]:
+                    self.frames[name] = frame
+            else:
+                self.get_logger().warn(f'Failed to capture frame from {name} camera', throttle_duration_sec=5.0)
+
     def timer_callback(self):
-        # Get timestamp for all cameras
         timestamp = self.get_clock().now().to_msg()
 
-        # Read and publish from all cameras
-        for name, cap in self.cameras.items():
-            ret, frame = cap.read()
-            if not ret:
-                self.get_logger().warn(f'Failed to capture frame from {name} camera')
+        for name in self.cameras:
+            with self.frame_locks[name]:
+                frame = self.frames[name]
+
+            if frame is None:
                 continue
 
             # Convert to ROS Image
@@ -102,15 +123,12 @@ class UsbCameraPublisher(Node):
             ros_image.header.stamp = timestamp
             ros_image.header.frame_id = self.camera_infos[name].header.frame_id
 
-            # Publish image
             self.image_pubs[name].publish(ros_image)
 
-            # Publish camera info
             self.camera_infos[name].header.stamp = timestamp
             self.info_pubs[name].publish(self.camera_infos[name])
 
     def destroy_node(self):
-        # Release all cameras
         for name, cap in self.cameras.items():
             self.get_logger().info(f'Releasing {name} camera')
             cap.release()
