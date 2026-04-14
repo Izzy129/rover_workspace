@@ -39,18 +39,19 @@ Parameters:
     smoothing_alpha - pose smoothing factor (0.7 default)
 """
 
+from concurrent.futures import ThreadPoolExecutor
+
+import cv2
+import numpy as np
 import rclpy
 import rclpy.node
-from rclpy.qos import qos_profile_sensor_data
-from cv_bridge import CvBridge
-import numpy as np
-import cv2
 import tf_transformations
-from sensor_msgs.msg import CameraInfo
-from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseArray, Pose
-from vision_interfaces.msg import ArucoMarkers
+from cv_bridge import CvBridge
+from geometry_msgs.msg import Pose, PoseArray
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
+from rclpy.qos import qos_profile_sensor_data
+from sensor_msgs.msg import CameraInfo, Image
+from vision_interfaces.msg import ArucoMarkers
 
 
 class ArucoNode(rclpy.node.Node):
@@ -104,6 +105,12 @@ class ArucoNode(rclpy.node.Node):
         self.frame_counters = {camera: 0 for camera in self.camera_names}
         self.info_subs = {}  # Store info subscriptions to destroy after first message
 
+        # One single-worker executor per camera — guarantees in-order processing per camera
+        # and avoids concurrent access to per-camera state (pose_trackers, frame_counters)
+        self.thread_pools = {
+            camera: ThreadPoolExecutor(max_workers=1) for camera in self.camera_names
+        }
+
         # Create subscriptions and publishers for each camera
         for camera in self.camera_names:
             image_topic = f'/camera_{camera}/image_raw'
@@ -115,16 +122,16 @@ class ArucoNode(rclpy.node.Node):
 
             # Subscribe to camera info (will be destroyed after first message)
             self.info_subs[camera] = self.create_subscription(
-                CameraInfo, 
-                info_topic, 
+                CameraInfo,
+                info_topic,
                 lambda msg, cam=camera: self.info_callback(msg, cam),
                 qos_profile_sensor_data
             )
 
             # Subscribe to raw image
             self.create_subscription(
-                Image, 
-                image_topic, 
+                Image,
+                image_topic,
                 lambda msg, cam=camera: self.image_callback(msg, cam),
                 qos_profile_sensor_data
             )
@@ -157,21 +164,23 @@ class ArucoNode(rclpy.node.Node):
         self.get_logger().info(f"Camera info received for {camera} camera")
 
     def image_callback(self, img_msg, camera):
-        """Process image from a specific camera and detect ArUco markers."""
-        # Check if camera info has been received
+        """Submit frame for processing — returns immediately so the ROS executor is never blocked."""
         if self.camera_infos[camera] is None:
             self.get_logger().warn(f"No camera info received for {camera} camera yet!")
             return
 
-        # Frame skipping logic
+        # Frame skipping logic (cheap, fine to do on executor thread)
         self.frame_counters[camera] += 1
         if self.frame_skip > 0 and self.frame_counters[camera] % (self.frame_skip + 1) != 0:
             return
 
+        self.thread_pools[camera].submit(self._process_frame, img_msg, camera)
+
+    def _process_frame(self, img_msg, camera):
+        """Detect ArUco markers and publish results. Runs in a per-camera worker thread."""
         cv_image = self.bridge.imgmsg_to_cv2(img_msg)
         markers = ArucoMarkers()
         pose_array = PoseArray()
-        # Set frame_id from camera configuration
         markers.header.frame_id = self.camera_frames[camera]
         pose_array.header.frame_id = self.camera_frames[camera]
         markers.header.stamp = img_msg.header.stamp
@@ -180,58 +189,46 @@ class ArucoNode(rclpy.node.Node):
         corners, marker_ids, rejected = cv2.aruco.detectMarkers(
             cv_image, self.aruco_dictionary, parameters=self.aruco_parameters
         )
-        output = cv_image.copy()
-        cv2.aruco.drawDetectedMarkers(output, corners, marker_ids)
-        
 
         if marker_ids is not None:
+            output = cv_image.copy()
+            cv2.aruco.drawDetectedMarkers(output, corners, marker_ids)
+
             for i, marker_id in enumerate(marker_ids):
-                # Get the 2D image points (detected corners)
                 image_points = corners[i][0].astype(np.float32)
-                
-                # Define 3D object points (marker corners in marker coordinate system)
+
                 half_size = self.marker_size / 2.0
                 object_points = np.array([
-                    [-half_size, half_size, 0],
-                    [half_size, half_size, 0],
-                    [half_size, -half_size, 0],
+                    [-half_size,  half_size, 0],
+                    [ half_size,  half_size, 0],
+                    [ half_size, -half_size, 0],
                     [-half_size, -half_size, 0]
                 ], dtype=np.float32)
-                
-                # Solve PnP to get pose
+
                 success, rvec, tvec = cv2.solvePnP(
-                    object_points, image_points, 
+                    object_points, image_points,
                     self.intrinsic_mats[camera], self.distortions[camera]
                 )
-                
+
                 if success:
-                    # Draw coordinate axes on the marker
-                    cv2.drawFrameAxes(output, self.intrinsic_mats[camera], self.distortions[camera], 
-                                    rvec, tvec, self.marker_size * 1.5, 2)
-                    
+                    cv2.drawFrameAxes(output, self.intrinsic_mats[camera], self.distortions[camera],
+                                      rvec, tvec, self.marker_size * 1.5, 2)
+
                     pose = Pose()
-                    
-                    # Current raw pose
                     curr_pos = np.array([tvec[0][0], tvec[1][0], tvec[2][0]])
-                    
+
                     rot_matrix = np.eye(4)
                     rot_matrix[0:3, 0:3] = cv2.Rodrigues(rvec)[0]
                     curr_quat = tf_transformations.quaternion_from_matrix(rot_matrix)
 
-                    # Apply smoothing if available
                     key = marker_id[0]
                     if key in self.pose_trackers[camera]:
                         prev_pos, prev_quat = self.pose_trackers[camera][key]
-                        
-                        # Smooth position (linear interpolation)
                         alpha = self.smoothing_alpha
                         new_pos = alpha * curr_pos + (1.0 - alpha) * prev_pos
-                        
-                        # Smooth orientation (SLERP)
                         new_quat = tf_transformations.quaternion_slerp(prev_quat, curr_quat, alpha)
-                        
                         self.pose_trackers[camera][key] = (new_pos, new_quat)
-                        
+
                         pose.position.x = new_pos[0]
                         pose.position.y = new_pos[1]
                         pose.position.z = new_pos[2]
@@ -240,9 +237,8 @@ class ArucoNode(rclpy.node.Node):
                         pose.orientation.z = new_quat[2]
                         pose.orientation.w = new_quat[3]
                     else:
-                        # First time seeing this marker, no smoothing
                         self.pose_trackers[camera][key] = (curr_pos, curr_quat)
-                        
+
                         pose.position.x = curr_pos[0]
                         pose.position.y = curr_pos[1]
                         pose.position.z = curr_pos[2]
@@ -258,15 +254,17 @@ class ArucoNode(rclpy.node.Node):
             self.poses_pubs[camera].publish(pose_array)
             self.markers_pubs[camera].publish(markers)
 
-        # Publish annotated image for RViz visualization
-        output_msg = self.bridge.cv2_to_imgmsg(output, encoding='bgr8')
-        output_msg.header = img_msg.header
-        self.image_pubs[camera].publish(output_msg)
+            output_msg = self.bridge.cv2_to_imgmsg(output, encoding='bgr8')
+            output_msg.header = img_msg.header
+            self.image_pubs[camera].publish(output_msg)
+        else:
+            # No markers — publish the raw image as-is
+            self.image_pubs[camera].publish(img_msg)
 
-        # Display the image with markers and axes
-        window_name = f"ArUco - {camera.capitalize()} Camera"
-        cv2.imshow(window_name, output)
-        cv2.waitKey(1)
+    def destroy_node(self):
+        for camera, pool in self.thread_pools.items():
+            pool.shutdown(wait=False)
+        super().destroy_node()
 
 
 def main():
