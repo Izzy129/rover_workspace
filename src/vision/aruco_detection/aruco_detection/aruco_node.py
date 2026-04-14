@@ -113,7 +113,7 @@ class ArucoNode(rclpy.node.Node):
 
         # Create subscriptions and publishers for each camera
         for camera in self.camera_names:
-            image_topic = f'/camera_{camera}/image_raw'
+            image_topic = f'/camera_{camera}/image_rect_color'
             info_topic = f'/camera_{camera}/camera_info'
 
             self.get_logger().info(f"Subscribing to {camera} camera:")
