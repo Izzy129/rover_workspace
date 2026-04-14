@@ -52,17 +52,6 @@ from geometry_msgs.msg import PoseArray, Pose
 from vision_interfaces.msg import ArucoMarkers
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 
-# Check OpenCV version - require 4.7+ for ArucoDetector API
-def check_opencv_version():
-    cv_version = tuple(map(int, cv2.__version__.split('.')[:2]))
-    if cv_version < (4, 7):
-        raise ImportError(
-            f"OpenCV {cv2.__version__} detected. This package requires OpenCV >= 4.7.0 for ArUco detection.\n"
-            f"Install with: pip install opencv-contrib-python>=4.8.0"
-        )
-
-check_opencv_version()
-
 
 class ArucoNode(rclpy.node.Node):
     def __init__(self):
@@ -104,8 +93,7 @@ class ArucoNode(rclpy.node.Node):
 
         dictionary_id = cv2.aruco.__getattribute__(self.marker_family)
         self.aruco_dictionary = cv2.aruco.getPredefinedDictionary(dictionary_id)
-        self.aruco_parameters = cv2.aruco.DetectorParameters()
-        self.detector = cv2.aruco.ArucoDetector(self.aruco_dictionary, self.aruco_parameters)
+        self.aruco_parameters = cv2.aruco.DetectorParameters_create()
         self.bridge = CvBridge()
 
         # Per-camera state storage
@@ -189,7 +177,9 @@ class ArucoNode(rclpy.node.Node):
         markers.header.stamp = img_msg.header.stamp
         pose_array.header.stamp = img_msg.header.stamp
 
-        corners, marker_ids, rejected = self.detector.detectMarkers(cv_image)
+        corners, marker_ids, rejected = cv2.aruco.detectMarkers(
+            cv_image, self.aruco_dictionary, parameters=self.aruco_parameters
+        )
         output = cv_image.copy()
         cv2.aruco.drawDetectedMarkers(output, corners, marker_ids)
         

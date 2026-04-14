@@ -32,9 +32,9 @@ RUN sudo apt-get update && sudo apt-get upgrade -y \
 # Source ROS environment automatically
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/$USERNAME/.bashrc
 
-# Install proper OpenCV version for Aruco API
-RUN pip install --break-system-packages "opencv-contrib-python>=4.8.0"
 
-# Install Ultralytics (YOLO) for object detection
-RUN pip install --break-system-packages ultralytics
+# Install Ultralytics (YOLO) for object detection.
+# Uninstall pip opencv and numpy afterwards, since we want the apt versions from rosdep instead.
+RUN pip install --break-system-packages ultralytics \
+    && pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless opencv-contrib-python-headless numpy 2>/dev/null || true
 

@@ -31,7 +31,7 @@ This workspace uses a Docker-based development environment:
 To start: Open in VSCode and click "Reopen in Container" when prompted.
 
 ### OpenCV Requirement
-The vision subsystem requires OpenCV 4.8+ for the ArUco API. The Dockerfile installs this via pip with `--break-system-packages` since Ubuntu's `python3-opencv` package may be too old.
+The vision subsystem uses the legacy `cv2.aruco.detectMarkers()` API, compatible with any OpenCV 4.x. OpenCV is installed via `python3-opencv` (apt/rosdep) — do NOT pip install opencv, as pip versions can conflict with numpy.
 
 ## Build Commands
 
@@ -198,7 +198,7 @@ Custom messages are defined in `src/interfaces/vision_interfaces/`:
 
 1. **No Python Virtual Environments**: All dependencies managed via rosdep and system packages (apt)
 2. **Use rosdep**: Add dependencies to `package.xml` and run `rosdep install`
-3. **Exception for OpenCV**: Use pip with `--break-system-packages` only for OpenCV 4.8+
+3. **OpenCV via apt only**: Use `python3-opencv` from apt/rosdep. Do not pip install opencv — pip versions conflict with system numpy.
 4. **Package Naming**: `<subsystem>_<component>` (e.g., `vision_bringup`, `arm_controller`)
 5. **Custom Messages**: Place in `src/interfaces/<subsystem>_interfaces/`
 6. **Launch Files**: Individual packages have their own launch files; bringup packages orchestrate subsystems
@@ -216,7 +216,7 @@ When implementing navigation, arm, or communications subsystems, follow the visi
 
 ## Common Issues
 
-**OpenCV ArUco API errors**: Ensure OpenCV >= 4.8 is installed. Check with:
+**OpenCV errors**: Install via apt, not pip: `sudo apt install python3-opencv`. Check version with:
 ```bash
 python3 -c "import cv2; print(cv2.__version__)"
 ```

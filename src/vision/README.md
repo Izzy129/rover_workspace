@@ -105,9 +105,32 @@ Subsystem-level launch orchestration that brings up the complete vision pipeline
 
 **Notes:**
 - We follow standard ROS2 practices - all Python dependencies are managed via rosdep/apt, not pip/venv
-- **Exception:** OpenCV 4.8+ is required for ArUco detection. If `python3-opencv` from apt is too old, use: `pip install opencv-contrib-python>=4.8.0`
 - **Exception:** `ultralytics` is not on apt — install via: `pip install ultralytics --break-system-packages`
-- `ros2_numpy` is vendored as a git submodule at `src/vision/ros2_numpy`. After cloning the repo, run: `git submodule update --init --recursive`
+
+### Fixing numpy/opencv conflicts (new machine setup)
+
+If you have pip-installed numpy or opencv from a previous install, they will take priority over the apt versions and cause version conflicts. Clean them up first:
+
+```bash
+pip uninstall numpy opencv-python opencv-contrib-python --break-system-packages
+```
+
+Then let rosdep install the correct apt versions:
+
+```bash
+rosdep install --from-paths src --ignore-src -r -y
+```
+
+Verify the right versions are active (paths should show `/usr/lib/python3/...`):
+
+```bash
+python3 -c "import numpy; print(numpy.__version__, numpy.__file__)"
+python3 -c "import cv2; print(cv2.__version__, cv2.__file__)"
+```
+
+Make sure you have opencv version **4.6.x** (as long as it's not 4.15.x ur good) and numpy version **1.26.x** (as long as it's not 2.x.x ur good)
+
+`ros2_numpy` is vendored as a git submodule at `src/vision/ros2_numpy`. After cloning the repo, run: `git submodule update --init --recursive`
 
 ## Quick Start
 

@@ -41,6 +41,6 @@
     "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
     "source=/dev,target=/dev,type=bind,consistency=cached"
   ],
-  "postCreateCommand": "bash -c 'cd \"$WORKSPACE_FOLDER\" && git submodule update --init --recursive && mkdir -p src && (if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi) && rosdep update && rosdep install --from-paths src --ignore-src -r -y && source /opt/ros/jazzy/setup.bash && colcon build && sudo chown -R $(id -u):$(id -g) .'"
+  "postCreateCommand": "bash -c 'cd \"$WORKSPACE_FOLDER\" && pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless opencv-contrib-python-headless numpy 2>/dev/null; git submodule update --init --recursive && mkdir -p src && (if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi) && rosdep update && rosdep install --from-paths src --ignore-src -r -y && source /opt/ros/jazzy/setup.bash && colcon build --continue-on-error; sudo chown -R $(id -u):$(id -g) .'"
 }
 
