@@ -107,8 +107,10 @@ class UsbCameraPublisher(Node):
 
             self.get_logger().info(f"{name} camera initialized successfully")
 
-        # Timer to publish at configured rate
-        self.timer = self.create_timer(1.0 / PUBLISH_RATE, self.timer_callback)
+        # Per-camera timers to publish at configured rate
+        for config in CAMERA_CONFIGS:
+            name = config['name']
+            self.create_timer(1.0 / PUBLISH_RATE, lambda n=name: self.publish_camera(n))
 
         self.get_logger().info(f'Camera publisher started with {len(self.cameras)} cameras at {PUBLISH_RATE} Hz')
 
@@ -143,21 +145,18 @@ class UsbCameraPublisher(Node):
                     throttle_duration_sec=5.0
                 )
 
-    def timer_callback(self):
-        timestamp = self.get_clock().now().to_msg()
+    def publish_camera(self, name):
+        with self.ros_image_locks[name]:
+            ros_image = self.ros_images[name]
 
-        for name in self.cameras:
-            with self.ros_image_locks[name]:
-                ros_image = self.ros_images[name]
-                if ros_image is None:
-                    continue
+        if ros_image is None:
+            return
 
-            # Stamp a copy so we don't mutate the shared object
-            ros_image.header.stamp = timestamp
-            self.image_pubs[name].publish(ros_image)
+        ros_image.header.stamp = self.get_clock().now().to_msg()
+        self.image_pubs[name].publish(ros_image)
 
-            self.camera_infos[name].header.stamp = timestamp
-            self.info_pubs[name].publish(self.camera_infos[name])
+        self.camera_infos[name].header.stamp = ros_image.header.stamp
+        self.info_pubs[name].publish(self.camera_infos[name])
     
     def destroy_node(self):
         for name, cap in self.cameras.items():
