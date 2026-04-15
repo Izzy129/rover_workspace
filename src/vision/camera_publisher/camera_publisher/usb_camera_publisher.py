@@ -32,6 +32,9 @@ CAMERA_CONFIGS = [
     {'name': 'right', 'device_index': 6, 'frame_id': 'right_camera_link'},
 ]
 PUBLISH_RATE = 30.0  # Hz
+CAMERA_WIDTH = 1280
+CAMERA_HEIGHT = 720
+CAMERA_FPS = 30
 
 # All 3 cameras are the same model so they share one calibration file
 _share = get_package_share_directory('camera_publisher')
@@ -65,6 +68,10 @@ class UsbCameraPublisher(Node):
 
             # Open camera
             cap = cv2.VideoCapture(device_index)
+            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+            cap.set(cv2.CAP_PROP_FPS, CAMERA_FPS)
             if not cap.isOpened():
                 self.get_logger().error(f'Cannot open {name} camera at device {device_index}')
                 raise RuntimeError(f'Failed to open {name} camera at device {device_index}')
