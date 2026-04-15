@@ -168,11 +168,15 @@ class UsbCameraPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = UsbCameraPublisher()
-    rclpy.spin(node)
 
-    node.destroy_node()
-    rclpy.shutdown()
+    executor = rclpy.executors.MultiThreadedExecutor(num_threads=6)
+    executor.add_node(node)
 
+    try:
+        executor.spin()
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
