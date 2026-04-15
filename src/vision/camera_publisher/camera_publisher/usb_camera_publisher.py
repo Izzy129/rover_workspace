@@ -67,7 +67,19 @@ class UsbCameraPublisher(Node):
             self.get_logger().info(f"Initializing {name} camera (device {device_index})...")
 
             # Open camera
-            cap = cv2.VideoCapture(device_index)
+            # Gstreamer pipeline
+            pipeline = (
+                f"v4l2src device=/dev/video{device_index} ! "
+                "image/jpeg, width={CAMERA_WIDTH}, height={CAMERA_HEIGHT}, framerate={CAMERA_FPS}/1 ! "
+                "jpegdec ! "
+                "nvvidconv ! "
+                "video/x-raw, format=(string)BGRx ! "
+                "videoconvert ! "
+                "video/x-raw, format=(string)BGR ! "
+                "appsink drop=1"
+            )
+            self.get_logger().info("HIIII THIS IS PIPELINEEE")
+            cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
             cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
