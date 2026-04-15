@@ -80,10 +80,6 @@ class UsbCameraPublisher(Node):
             )
             self.get_logger().info("HIIII THIS IS PIPELINEEE")
             cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
-            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-            cap.set(cv2.CAP_PROP_FPS, CAMERA_FPS)
             if not cap.isOpened():
                 self.get_logger().error(f'Cannot open {name} camera at device {device_index}')
                 raise RuntimeError(f'Failed to open {name} camera at device {device_index}')
