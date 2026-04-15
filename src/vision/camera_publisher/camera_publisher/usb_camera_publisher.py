@@ -27,13 +27,13 @@ from sensor_msgs.srv import SetCameraInfo
 
 # Camera configuration
 CAMERA_CONFIGS = [
-    {'name': 'left', 'device_index': 2, 'frame_id': 'left_camera_link'},
-    {'name': 'front', 'device_index': 0, 'frame_id': 'front_camera_link'},
-    {'name': 'right', 'device_index': 6, 'frame_id': 'right_camera_link'},
+    {'name': 'left', 'device_index': 0, 'frame_id': 'left_camera_link'},
+    {'name': 'front', 'device_index': 4, 'frame_id': 'front_camera_link'},
+    {'name': 'right', 'device_index': 8, 'frame_id': 'right_camera_link'},
 ]
 PUBLISH_RATE = 30.0  # Hz
-CAMERA_WIDTH = 1280
-CAMERA_HEIGHT = 720
+CAMERA_WIDTH = 640
+CAMERA_HEIGHT = 480
 CAMERA_FPS = 30
 
 # All 3 cameras are the same model so they share one calibration file
@@ -54,9 +54,9 @@ class UsbCameraPublisher(Node):
         self.info_pubs = {}
         self.camera_infos = {}
 
-        # Latest frames from capture threads
-        self.frames = {}
-        self.frame_locks = {}
+        # ROS image storage 
+        self.ros_images = {}
+        self.ros_image_locks = {}
 
         # Initialize all cameras
         for config in CAMERA_CONFIGS:
@@ -87,9 +87,8 @@ class UsbCameraPublisher(Node):
             self.camera_infos[name] = camera_info
 
             # Frame buffer and lock for this camera
-            self.frames[name] = None
-            self.frame_locks[name] = threading.Lock()
-
+            self.ros_images[name] = None
+            self.ros_image_locks[name] = threading.Lock()
             # Dedicated capture thread so cap.read() never blocks the ROS executor
             t = threading.Thread(target=self._capture_loop, args=(name,), daemon=True)
             t.start()
@@ -116,36 +115,38 @@ class UsbCameraPublisher(Node):
         return info
 
     def _capture_loop(self, name):
-        """Continuously reads frames from the camera into a buffer."""
+        """Captures frames and pre-converts to ROS Image in background thread."""
         cap = self.cameras[name]
+        frame_id = next(c['frame_id'] for c in CAMERA_CONFIGS if c['name'] == name)
         while rclpy.ok():
             ret, frame = cap.read()
             if ret:
-                with self.frame_locks[name]:
-                    self.frames[name] = frame
+                ros_image = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
+                ros_image.header.frame_id = frame_id
+                with self.ros_image_locks[name]:
+                    self.ros_images[name] = ros_image
             else:
-                self.get_logger().warn(f'Failed to capture frame from {name} camera', throttle_duration_sec=5.0)
+                self.get_logger().warn(
+                    f'Failed to capture frame from {name} camera',
+                    throttle_duration_sec=5.0
+                )
 
     def timer_callback(self):
         timestamp = self.get_clock().now().to_msg()
 
         for name in self.cameras:
-            with self.frame_locks[name]:
-                frame = self.frames[name]
+            with self.ros_image_locks[name]:
+                ros_image = self.ros_images[name]
+                if ros_image is None:
+                    continue
 
-            if frame is None:
-                continue
-
-            # Convert to ROS Image
-            ros_image = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
+            # Stamp a copy so we don't mutate the shared object
             ros_image.header.stamp = timestamp
-            ros_image.header.frame_id = self.camera_infos[name].header.frame_id
-
             self.image_pubs[name].publish(ros_image)
 
             self.camera_infos[name].header.stamp = timestamp
             self.info_pubs[name].publish(self.camera_infos[name])
-
+    
     def destroy_node(self):
         for name, cap in self.cameras.items():
             self.get_logger().info(f'Releasing {name} camera')
