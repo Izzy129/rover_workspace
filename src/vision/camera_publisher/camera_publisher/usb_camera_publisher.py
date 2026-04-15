@@ -70,7 +70,7 @@ class UsbCameraPublisher(Node):
             # Gstreamer pipeline
             pipeline = (
                 f"v4l2src device=/dev/video{device_index} ! "
-                "image/jpeg, width={CAMERA_WIDTH}, height={CAMERA_HEIGHT}, framerate={CAMERA_FPS}/1 ! "
+                f"image/jpeg, width={CAMERA_WIDTH}, height={CAMERA_HEIGHT}, framerate={CAMERA_FPS}/1 ! "
                 "jpegdec ! "
                 "nvvidconv ! "
                 "video/x-raw, format=(string)BGRx ! "
