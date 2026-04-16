@@ -12,7 +12,7 @@ cp -rf "$DRIVER_DIR/launch_ROS2/" "$DRIVER_DIR/launch/"
 
 # Build
 cd "$WORKSPACE_ROOT"
-colcon build --packages-select livox_ros_driver2 --cmake-args -DROS_EDITION=ROS2 -DHUMBLE_ROS=humble
+colcon build --packages-select livox_ros_driver2 --cmake-args -DROS_EDITION=ROS2 -DDISTRO_ROS=jazzy
 
 # Clean up temporary launch/ copy
 rm -rf "$DRIVER_DIR/launch/"
